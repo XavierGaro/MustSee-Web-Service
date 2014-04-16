@@ -107,7 +107,6 @@ class XMLSerializer {
                 // Obtenim l'objecte
                 $xml .= self::getXMLfromObject($value);
             } else {
-
                 // Afegim el node
                 $xml .= "<$name>";
                 $xml .= "$value";
@@ -129,10 +128,7 @@ class XMLSerializer {
 
         if (preg_match($pattern, $method_name)) {
             // Comprovem si hi ha una propietat amb aquest nom
-            if ($reflect->getProperty(self::retallaGet($method_name)) === null) {
-                // No Existeix
-            } else {
-                // Existeix
+            if ($reflect->getProperty(self::retallaGet($method_name)) !== null) {
                 return true;
             }
         }
@@ -141,7 +137,6 @@ class XMLSerializer {
 
 
     // Eliminem el get i posem el primer caràcter en minúscules
-
     private static function retallaGet($method_name) {
         $method_name = substr_replace($method_name, '', 0, 3);
         $method_name = substr_replace($method_name, strtolower($method_name[0]), 0, 1);
