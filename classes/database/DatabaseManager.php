@@ -35,11 +35,11 @@ class DataBaseManager {
 
         switch ($dataSource) {
             case 'MySQL':
-                $pdo = DBHelper::getConnection('MySQL', $variables);
+                $pdo = DatabaseHelper::getConnection('MySQL', $variables);
                 break;
 
             case 'PostgreSQL':
-                $pdo = DBHelper::getConnection('PostgreSQL', $variables);
+                $pdo = DatabaseHelper::getConnection('PostgreSQL', $variables);
                 break;
 
             default:
