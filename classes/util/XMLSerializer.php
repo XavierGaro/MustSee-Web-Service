@@ -11,27 +11,31 @@
  * @author Xavier García
  */
 class XMLSerializer {
-    const ENCODING = 'iso-8859-1';
+    const ENCODING     = 'iso-8859-1';
     const DEFAULT_NODE = 'node';
 
     /**
-     * Retorna una cadena de codi XML amb totes les dades del objecte o array passat com argument incloent
-     * la capçalera XML amb la codificació especificada.
-     * @param mixed $object objecte que volem convertir en XML
-     * @param string $root nom del element arrel que es farà servir en cas de que no es tracti d'un objecte
+     * Retorna una cadena de codi XML amb totes les dades del objecte o array passat com argument
+     * incloent la capçalera XML amb la codificació especificada.
+     *
+     * @param mixed  $object   objecte que volem convertir en XML
+     * @param string $root     nom del element arrel que es farà servir en cas de que no es
+     *                         tracti d'un objecte
      * @param string $encoding codificació de la pàgina
      * @return string dades en format XML amb capçalera
      */
     public static function getValidXML($object, $root = 'root', $encoding = self::ENCODING) {
         $xml = "<?xml version=\"1.0\" encoding=\"$encoding\" ?>";
         $xml .= self::getXML($object, $root);
+
         return $xml;
     }
 
     /**
      * Retorna una cadena de codi XML amb totes les dades del objecte o array passat com argument.
-     * @param mixed $value valor del element
-     * @param string $node nom del node
+     *
+     * @param mixed  $value valor del element
+     * @param string $node  nom del node
      * @return string dades en format XML
      */
     static function getXML($value, $node) {
@@ -51,7 +55,8 @@ class XMLSerializer {
 
     /**
      * Extreu les dades del array i les retorna com XML
-     * @param array $array array del que extraiem les dades
+     *
+     * @param array  $array array del que extraiem les dades
      * @param string $group nom que rebrà el grup
      * @return string dades en format XML
      */
@@ -70,8 +75,9 @@ class XMLSerializer {
 
     /**
      * Retorna una cadena XML amb el nom del node i el valor passat com argument
-     * @param mixed $value valor del element
-     * @param string $node nom del node
+     *
+     * @param mixed  $value valor del element
+     * @param string $node  nom del node
      * @return string dades en format XML
      */
     private static function getXMLFromPrimitive($value, $node) {
@@ -84,7 +90,8 @@ class XMLSerializer {
 
     /**
      * Extreu les propietats públiques i les privades que disposin de getter públic del objecte i
-     * les retorna en format XML.
+     *  les retorna en format XML.
+     *
      * @param object $object del que volem extreure les dades
      * @return string dades en format XML
      */
@@ -105,10 +112,13 @@ class XMLSerializer {
      * Extreu les propietats públiques i les propietats privades que disposin d'un getter públic.
      * En cas de conflicte les propietats amb getter tenen prioritat sobre les propietats sense
      * getter.
+     *
      * @param object $object objecte del que volem extreure les dades
      * @return array amb les propietats que s'han pogut extreure amb el format name=>value
      */
     private static function extractPrivateProperties($object) {
+        $properties = array();
+
         // Reflectim la classe
         $reflect = new ReflectionClass($object);
 
@@ -137,8 +147,8 @@ class XMLSerializer {
     }
 
     /**
-     * @param ReflectionClass $reflect classe reflectia on es troba el mètode que volem comprovar.
-     * @param $methodName nom del mètode a comprovar
+     * @param ReflectionClass $reflect    classe reflectia on es troba el mètode que volem comprovar.
+     * @param string          $methodName nom del mètode a comprovar
      * @return bool true si es un getter o false en cas contrari
      */
     private static function isGetter(ReflectionClass $reflect, $methodName) {
@@ -149,11 +159,13 @@ class XMLSerializer {
                 return true;
             }
         }
+
         return false;
     }
 
     /**
      * Si el mètode passat com argument començar per 'get' el retalla
+     *
      * @param string $methodName no del que volem eliminar el get
      * @return string el nom sense get al principi
      */
@@ -162,13 +174,16 @@ class XMLSerializer {
         if (preg_match($pattern, $methodName)) {
             $methodName = substr_replace($methodName, '', 0, 3);
             $methodName = substr_replace($methodName, strtolower($methodName[0]), 0, 1);
-            return $methodName;
         }
+
+        return $methodName;
     }
 
     /**
-     * Si es un número el substitueix pel nom de node per defecte. En qualsevol cas el posa en minúscules.
-     * @param $node node que volem sanejar
+     * Si es un número el substitueix pel nom de node per defecte. En qualsevol cas el posa en
+     * minúscules.
+     *
+     * @param string $node node que volem sanejar
      */
     private static function sanitizeNode(&$node) {
         if (is_numeric($node)) {
@@ -179,7 +194,8 @@ class XMLSerializer {
 
     /**
      * Saneja el valor passat com argument.
-     * @param $value valor a sanejar
+     *
+     * @param string $value valor a sanejar
      */
     private static function sanitizeValue(&$value) {
         $value = htmlspecialchars($value, ENT_QUOTES);
