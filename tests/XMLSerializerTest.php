@@ -1,5 +1,5 @@
 <?php
-require_once '../classes/util/XMLSerializer.php';
+require_once '../classes/serializer/XMLSerializer.php';
 require_once 'XMLSerializerMockObject.php';
 
 class XMLSerializerTest extends PHPUnit_Framework_TestCase {
