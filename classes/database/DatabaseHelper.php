@@ -38,7 +38,7 @@ class DatabaseHelper {
     /**
      * Crea una instància de PDO amb les dades passades com argument.
      *
-     * @param $variables array associatiu amb les variables per crear la connexió.
+     * @param array $variables array associatiu amb les variables per crear la connexió.
      * @return PDO correctament inicialitzat
      */
     private static function getInstanceMySQL($variables) {
@@ -61,7 +61,7 @@ class DatabaseHelper {
      * Crea una instància de PDO amb les dades passades com argument.
      * TODO: sense provar.
      *
-     * @param $variables array associatiu amb les variables per crear la connexió.
+     * @param array $variables array associatiu amb les variables per crear la connexió.
      * @return PDO correctament inicialitzat
      */
     private static function getInstancePostgreSQL($variables) {

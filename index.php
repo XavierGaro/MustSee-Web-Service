@@ -1,19 +1,24 @@
 <?php
-require 'vendor/autoload.php';
+//require 'vendor/autoload.php';
+require_once 'Slim/Slim.php';
 require 'templates/CustomView.php';
 
+echo "rerouteando";
+
 // create new Slim instance
-$app = new \Slim\Slim(array(
+$app = new Slim();
+/*$app = new \Slim\Slim(array(
     'templates.path' => './templates', // este es el valor por defecto, no hace nada
     'view' => new CustomView() // asignamos una vista personalizada
     ));
-
+*/
 
 // Para el directorio raíz del sitio
+/*
 $app->get('/', function() {
     echo "Root!";
 });
-
+*/
 
 // Llamado si es por post
 $app->post('/books/:id', function ($id) {
@@ -202,6 +207,7 @@ $url2 = $app->urlFor('tata', array('name' => 'Josh')); // /test_slim/hell/Josh
 */
 
 
+/* ESTO SOLO FUNCIONA CON VERSIONES POSTERIORES Y PHP 5.3+
 
 // Request param variables, devuelve el valor de la variable pasada por el metodo
 
@@ -249,6 +255,7 @@ $app->render(
 );
 */
 
+/* ESTO SOLO FUNCIONA CON VERSIONES POSTERIORES Y PHP 5.3+
 // Añadir datos al view. SET sustituye los datos anteriores por los nuevos
 $app->get('/render2/:id', function ($id) use ($app) {
     $app->view->setData(array(

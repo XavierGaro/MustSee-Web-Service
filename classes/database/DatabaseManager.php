@@ -9,7 +9,7 @@ require_once 'DatabaseHelper.php';
  * @author Xavier García
  */
 class DataBaseManager {
-
+    const DB_CONFIG = 'db_config.ini';
     private $pdo;
 
     /**
@@ -30,7 +30,7 @@ class DataBaseManager {
      * @throws Exception si el tipus de bases de dades no es vàlid.
      * @return DataBaseManager instància del gestor de dades
      */
-    function getInstance($dataSource, $dbConfig = 'db_config.ini') {
+    function getInstance($dataSource, $dbConfig = self::DB_CONFIG) {
         $variables = parse_ini_file($dbConfig);
 
         switch ($dataSource) {
