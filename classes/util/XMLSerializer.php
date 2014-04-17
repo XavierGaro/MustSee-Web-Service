@@ -38,7 +38,7 @@ class XMLSerializer {
      * @param string $node  nom del node
      * @return string dades en format XML
      */
-    static function getXML($value, $node) {
+    static function getXML($value, $node = self::DEFAULT_NODE) {
         // Comprovem quin tipus de valor s'ha rebut
         if (is_array($value)) {
             $xml = self::getXMLFromArray($value, $node);
