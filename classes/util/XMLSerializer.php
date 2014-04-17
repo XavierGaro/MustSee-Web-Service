@@ -4,128 +4,113 @@
  * Class XMLSerializer
  * Classe que permet convertir objectes, primitives i arrays en cadenes de text en format XML.
  * Pot generar tant el codi XML per objectes individuals com l'arxiu vàlid amb capçalera.
- * Primer obté totes les propietats amb getter, i després comprova totes les propietats publicas amb getter o sense
- * getter, que no hagi estat ja afegides en el pas anterior.
+ * Obté totes les propietats públiques i les privades que tinguin un getter dels objectes. El
+ * getter ha de seguir el format 'getNomPropietat' exactament per ser reconegut i ha de ser
+ * públic.
  *
  * @author Xavier García
  */
 class XMLSerializer {
+    const ENCODING = 'iso-8859-1';
+    const DEFAULT_NODE = 'node';
+
     /**
      * Retorna una cadena de codi XML amb totes les dades del objecte o array passat com argument.
      * @param $object objecte que volem convertir en XML.
-     * @param string $root nom del element arrél que es farà servir en cas de que es tracti d'un array.
+     * @param string $root nom del element arrel que es farà servir en cas de que es tracti d'un array.
      * @param string $encoding codificació de la pàgina
      * @return string amb l'objecte convertit en XML
      */
-    public static function getValidXML($object, $root = 'root', $encoding = 'iso-8859-1') {
+    public static function getValidXML($object, $root = 'root', $encoding = self::ENCODING) {
         $xml = "<?xml version=\"1.0\" encoding=\"$encoding\" ?>";
         $xml .= self::getXML($object, $root);
         return $xml;
     }
 
-    public static function getXML($object, $root = 'root') {
-        if (is_array($object)) {
-            return self::getXMLfromArray($object, $root);
-        } else if (is_object($object)) {
-            return self::getXMLfromObject($object);
+    static function getXML($value, $node) {
+        // Comprovem quin tipus de valor s'ha rebut
+        if (is_array($value)) {
+            // Processem l'array
+            $xml = self::getXMLFromArray($value, $node);
+
+        } else if (is_object($value)) {
+            // Processem l'objecte
+            $xml = self::getXMLFromObject($value);
+
         } else {
-            return self::getXMLFromPrimitive($object);
+            $xml = self::getXMLFromPrimitive($node, $value);
         }
-    }
 
-    private static function getXMLfromArray(array $array, $node = 'node') {
-        // Recorrem tots els elements del array
-        $xml = "<$node>";
-
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $xml . self::getXMLfromArray($value, $node);
-            } else if (is_object($value)) {
-                $xml .= self::getXMLfromObject($value);
-            } else {
-                $xml .= self::getXMLFromPrimitive($value, $key);
-            }
-        }
-        $xml .= "</$node>";
         return $xml;
     }
 
-    // TODO: Refactoritzar per crear un array amb els parells name / value tant dels mètodes com dels atributs i després
-    // recórrer-los
-    private static function getXMLfromObject($object) {
-        // Obtenim la classe reflectida
+    private static function getXMLFromArray(array $array, $group) {
+        // Sanegem el nom del grup
+        self::sanitizeNode($group);
+
+        $xml = "<$group>";
+        foreach ($array as $node => $value) {
+            $xml .= self::getXML($value, $node);
+        }
+        $xml .= "</$group>";
+        return $xml;
+    }
+
+    private static function getXMLFromPrimitive($node, $value) {
+        // Sanegem el nom del node i el valor
+        self::sanitizeNode($node);
+        self::sanitizeValue($value);
+
+        // Afegim el valor
+        $xml = "<$node>$value</$node>";
+
+        return $xml;
+    }
+
+    private static function getXMLFromObject($object) {
+        // Obtenim el nom de la classe
+        $className = strtolower(get_class($object));
+
+        // Obtenim les propietats accessibles
+        $properties = get_object_vars($object);
+
+        // Afegim les propietats privades amb getters
+        $properties = array_merge($properties, self::extractPrivateProperties($object));
+
+        return self::getXMLFromArray($properties, $className);
+    }
+
+    private static function extractPrivateProperties($object) {
+        // Reflectim la classe
         $reflect = new ReflectionClass($object);
 
-        // Obrim la etiqueta del node
-        $class_name = strtolower($reflect->getName());
-        $xml = "<$class_name>";
+        // Obtenim els mètodes públics de la classe
+        $methods = $reflect->getMethods(ReflectionMethod::IS_PUBLIC);
 
-        // Recorrem tots els mètodes de la classe per obtenir els getters als atributs
-        $methods = $reflect->getMethods();
-        $atributs_trobats = array();
-
+        // Recorrem tots els mètodes de la classe per obtenir els getters de les propietats
         foreach ($methods as $method) {
-            $method_name = $method->name;
-            if (self::isGetter($reflect, $method_name) !== true) {
+            $name = $method->name;
+            if (self::isGetter($reflect, $name) !== true) {
                 // si no es un getter continuem
                 continue;
             }
-            $method_name = self::retallaGet($method_name);
 
-            // Afegim el atribut a la llista de propietats trobat
-            array_push($atributs_trobats, $method_name);
+            // Eliminem el get per obtenir el nom de la propietat
+            $name = self::retallaGet($name);
 
-            // Comprovem de quina classe es el valor i posem el nom en minúscules
-            $method_value = $method->invoke($object);
-            $method_name = strtolower($method_name);
+            // Obtenim el valor
+            $value = $method->invoke($object);
 
-            if (is_array($method_value)) {
-                // Recorrem tots els elements del array
-                $xml .= self::getXMLfromArray($method_value, $method_name);
-            } else if (is_object($method_value)) {
-                // Obtenim l'objecte
-                $xml .= self::getXMLfromObject($method_value);
-            } else {
-                // Afegim el node
-                $xml .= "<$method_name>";
-                $xml .= "$method_value";
-                $xml .= "</$method_name>";
-            };
+            // Afegim el parell al array
+            $properties[$name] = $value;
         }
 
-        $propietats_accessibles = get_object_vars($object);
-        foreach ($propietats_accessibles as $name => $value) {
-            if (in_array($name, $atributs_trobats)) {
-                // ja l'hem processat
-                continue;
-            }
-
-            if (is_array($value)) {
-                // Recorrem tots els elements del array
-                $xml .= self::getXMLfromArray($value, $name);
-            } else if (is_object($value)) {
-                // Obtenim l'objecte
-                $xml .= self::getXMLfromObject($value);
-            } else {
-                // Afegim el node
-                $xml .= "<$name>";
-                $xml .= "$value";
-                $xml .= "</$name>";
-            };
-
-        }
-
-
-        // Tanquem el node
-        $xml .= "</$class_name>";
-
-        return $xml;
+        return $properties;
     }
 
+    // Eliminem el get i posem el primer caràcter en minúscules
     private static function isGetter($reflect, $method_name) {
-        // Comprovem si es un getter
         $pattern = '/^get.+/';
-
         if (preg_match($pattern, $method_name)) {
             // Comprovem si hi ha una propietat amb aquest nom
             if ($reflect->getProperty(self::retallaGet($method_name)) !== null) {
@@ -134,21 +119,20 @@ class XMLSerializer {
         }
         return false;
     }
-
-
-    // Eliminem el get i posem el primer caràcter en minúscules
     private static function retallaGet($method_name) {
         $method_name = substr_replace($method_name, '', 0, 3);
         $method_name = substr_replace($method_name, strtolower($method_name[0]), 0, 1);
         return $method_name;
     }
 
-    // Conté un valor primitiu
-    private static function getXMLFromPrimitive($value, $node = 'node') {
+    private static function sanitizeNode(&$node) {
         if (is_numeric($node)) {
-            $node = 'node';
+            $node = self::DEFAULT_NODE;
         }
+        $node = strtolower($node);
+    }
+
+    private static function sanitizeValue(&$value) {
         $value = htmlspecialchars($value, ENT_QUOTES);
-        return "<$node>$value</$node>";
     }
 }

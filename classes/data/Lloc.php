@@ -10,8 +10,6 @@ class Lloc
     private $latitud;
     private $longitud;
 
-    public $test = "valor de prova";
-
     // Propietats mutables
     private $imatges;
 
@@ -71,7 +69,4 @@ class Lloc
         }
     }
 
-    public function getTest() {
-        return "aquest surt i l'altre no";
-    }
 }
