@@ -1,24 +1,24 @@
 <?php
 //require 'vendor/autoload.php';
 require_once 'Slim/Slim.php';
-require 'templates/CustomView.php';
+require 'Templates/CustomView.php';
 
-echo "rerouteando";
+
 
 // create new Slim instance
 $app = new Slim();
 /*$app = new \Slim\Slim(array(
-    'templates.path' => './templates', // este es el valor por defecto, no hace nada
+    'Templates.path' => './Templates', // este es el valor por defecto, no hace nada
     'view' => new CustomView() // asignamos una vista personalizada
     ));
 */
 
 // Para el directorio raíz del sitio
-/*
+
 $app->get('/', function() {
     echo "Root!";
 });
-*/
+
 
 // Llamado si es por post
 $app->post('/books/:id', function ($id) {

@@ -1,6 +1,10 @@
 <?php
-
-require_once 'DatabaseHelper.php';
+namespace MustSee\Database;
+use MustSee\Data\Categoria;
+use MustSee\Data\Comentari;
+use MustSee\Data\Imatge;
+use MustSee\Data\Lloc;
+use MustSee\Data\Usuari;
 
 /**
  * Class DataBaseManager
@@ -16,7 +20,7 @@ class DataBaseManager {
      * El constructor es privat, s'han d'instanciar cridant a mètode DataBaseManager#getInstance
      * ().
      *
-     * @param $pdo instància de la classe PDO inicialitzada.
+     * @param \PDO $pdo instància de la classe PDO inicialitzada.
      */
     private function __construct($pdo) {
         $this->pdo = $pdo;
@@ -27,23 +31,23 @@ class DataBaseManager {
      *
      * @param string $dataSource tipus de base de dades
      * @param string $dbConfig   fitxer de configuració amb les dades per connectar
-     * @throws Exception si el tipus de bases de dades no es vàlid.
+     * @throws \Exception si el tipus de bases de dades no es vàlid.
      * @return DataBaseManager instància del gestor de dades
      */
-    function getInstance($dataSource, $dbConfig = self::DB_CONFIG) {
+    static function getInstance($dataSource, $dbConfig = self::DB_CONFIG) {
         $variables = parse_ini_file($dbConfig);
 
         switch ($dataSource) {
             case 'MySQL':
-                $pdo = DatabaseHelper::getConnection('MySQL', $variables);
+                $pdo = DatabaseFactory::getConnection('MySQL', $variables);
                 break;
 
             case 'PostgreSQL':
-                $pdo = DatabaseHelper::getConnection('PostgreSQL', $variables);
+                $pdo = DatabaseFactory::getConnection('PostgreSQL', $variables);
                 break;
 
             default:
-                throw new Exception('El tipus de base de dades no es vàlid');
+                throw new \Exception('El tipus de base de dades no es vàlid');
         }
 
         return new DataBaseManager($pdo);
@@ -99,11 +103,11 @@ class DataBaseManager {
      * Retorna el lloc demanat com argument.
      *
      * @param integer $id id del lloc que volem obtenir.
-     * @return Lloc lloc construït amb les dades de la base de dades.
+     * @return \MustSee\Data\Lloc lloc construït amb les dades de la base de dades.
      */
     function getLloc($id) {
         $statement = $this->pdo->prepare('SELECT nom, descripcioExtesa, categories_id_categoria, latitud, longitud FROM llocs WHERE id_llocs = ?');
-        $statement->bindValue(1, $id, PDO::PARAM_INT);
+        $statement->bindValue(1, $id, \PDO::PARAM_INT);
         $statement->execute();
         $result = $statement->fetch();
 
@@ -129,7 +133,7 @@ class DataBaseManager {
      */
     function getImatgesFromLloc($llocId) {
         $statement = $this->pdo->prepare('SELECT id_foto, url, descripcio FROM fotos WHERE llocs_id_llocs = ?');
-        $statement->bindValue(1, $llocId, PDO::PARAM_INT);
+        $statement->bindValue(1, $llocId, \PDO::PARAM_INT);
         $statement->execute();
         $result = $statement->fetchAll();
 
@@ -154,7 +158,7 @@ class DataBaseManager {
      */
     function getImatge($id) {
         $statement = $this->pdo->prepare('SELECT id_foto, url, descripcio, llocs_id_llocs FROM fotos WHERE id_foto = ?');
-        $statement->bindValue(1, $id, PDO::PARAM_INT);
+        $statement->bindValue(1, $id, \PDO::PARAM_INT);
         $statement->execute();
         $result = $statement->fetch();
 
@@ -176,7 +180,7 @@ class DataBaseManager {
      */
     function getComentarisFromLloc($llocId) {
         $statement = $this->pdo->prepare('SELECT id_comentaris, text, perfil_users_id_usuari FROM comentaris WHERE llocs_id_llocs = ?');
-        $statement->bindValue(1, $llocId, PDO::PARAM_INT);
+        $statement->bindValue(1, $llocId, \PDO::PARAM_INT);
         $statement->execute();
         $result = $statement->fetchAll();
 
@@ -201,7 +205,7 @@ class DataBaseManager {
      */
     function getComentarisFromUsuari($usuariId) {
         $statement = $this->pdo->prepare('SELECT id_comentaris, text, llocs_id_llocs FROM comentaris WHERE perfil_users_id_usuari = ?');
-        $statement->bindValue(1, $usuariId, PDO::PARAM_INT);
+        $statement->bindValue(1, $usuariId, \PDO::PARAM_INT);
         $statement->execute();
         $result = $statement->fetchAll();
 
@@ -226,7 +230,7 @@ class DataBaseManager {
      */
     function getUsuari($id) {
         $statement = $this->pdo->prepare('SELECT correu, nom, cognom FROM users INNER JOIN perfil ON (users_id_usuari = id_usuari) WHERE id_usuari = ?');
-        $statement->bindValue(1, $id, PDO::PARAM_INT);
+        $statement->bindValue(1, $id, \PDO::PARAM_INT);
         $statement->execute();
         $result = $statement->fetch();
 
@@ -250,8 +254,8 @@ class DataBaseManager {
         // Convertim el password en hash
         $hash      = hash('sha1', $password);
         $statement = $this->pdo->prepare('SELECT correu, password FROM users WHERE correu = ? AND password = ? ');
-        $statement->bindValue(1, $correu, PDO::PARAM_STR);
-        $statement->bindValue(2, $hash, PDO::PARAM_STR);
+        $statement->bindValue(1, $correu, \PDO::PARAM_STR);
+        $statement->bindValue(2, $hash, \PDO::PARAM_STR);
         $statement->execute();
 
         // Comprovem si hi ha cap coincidència

@@ -1,14 +1,27 @@
 <?php
-require_once 'classes/database/DatabaseManager.php';
-require_once 'classes/data/Categoria.php';
-require_once 'classes/data/Lloc.php';
-require_once 'classes/data/Imatge.php';
-require_once 'classes/data/Comentari.php';
-require_once 'classes/data/Usuari.php';
-require_once 'classes/serializer/XMLSerializer.php';
+require_once 'Slim/Slim.php';
+\Slim\Slim::registerAutoloader();
 
-$dbm = DataBaseManager::getInstance('MySQL');
+//require_once 'MustSee/Database/DatabaseManager.php';
+//$dbm = MustSee\Database\DataBaseManager::getInstance('MySQL');
 
+
+
+//require_once 'Serializer/SerializerFactory.php';
+//require_once 'Serializer/XMLSerializer.php';
+//require_once 'Serializer/Serializer.php';
+
+/*
+require_once 'MustSee/Data/Categoria.php';
+require_once 'MustSee/Data/Lloc.php';
+require_once 'MustSee/Data/Imatge.php';
+require_once 'MustSee/Data/Comentari.php';
+require_once 'MustSee/Data/Usuari.php';
+
+require_once 'Serializer/XMLSerializer.php';*/
+
+
+/*
 header('Content-type: application/xml;charset=iso-8859-1');
 
 //header('Content-type: application/json');
@@ -19,7 +32,12 @@ $xml = $lloc;
 
 //$xml = array ("paco", "pedro", "ramirez", new Categoria("playas"));
 
-//$xml = "caracolas";
 
 
-echo XMLSerializer::getValidXML($xml, 'llocs');
+
+$serializer = new \Serializer\XMLSerializer();
+
+*/
+$xml = "caracolas";
+$serializer = \Serializer\SerializerFactory::getInstance('xml');
+echo $serializer->getSerialized($xml, 'llocs');

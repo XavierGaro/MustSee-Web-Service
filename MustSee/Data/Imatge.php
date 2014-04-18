@@ -1,15 +1,17 @@
 <?php
-class Comentari {
+namespace MustSee\Data;
+
+class Imatge {
     private $id;
-    private $text;
-    private $usuariId;
+    private $titol;
+    private $url;
     private $llocId;
 
     function __construct()
     {
-        $this->text = func_get_arg(0);
-        $this->usuariId = func_get_arg(1);
-        $this->llocId = func_get_arg(2);
+        $this->titol = func_get_arg(0);
+        $this->url = func_get_arg(1);
+        $this->llocId= func_get_arg(2);
 
         if (func_num_args()===4) {
             $this->id = func_get_arg(3);
@@ -26,13 +28,14 @@ class Comentari {
         return $this->llocId;
     }
 
-    public function getUsuariId()
+    public function getTitol()
     {
-        return $this->usuariId;
+        return $this->titol;
     }
 
-    public function getText()
+    public function getUrl()
     {
-        return $this->text;
+        return $this->url;
     }
 }
+

@@ -1,11 +1,11 @@
 <?php
-require_once 'classes/database/DatabaseManager.php';
-require_once 'classes/data/Categoria.php';
-require_once 'classes/data/Lloc.php';
-require_once 'classes/data/Imatge.php';
-require_once 'classes/data/Comentari.php';
-require_once 'classes/data/Usuari.php';
-require_once 'classes/serializer/XMLSerializer.php';
+require_once 'classes/Database/DatabaseManager.php';
+require_once 'classes/Data/Categoria.php';
+require_once 'classes/Data/Lloc.php';
+require_once 'classes/Data/Imatge.php';
+require_once 'classes/Data/Comentari.php';
+require_once 'classes/Data/Usuari.php';
+require_once 'classes/Serializer/XMLSerializer.php';
 
 
 $dbm = DataBaseManager::getInstance('MySQL');

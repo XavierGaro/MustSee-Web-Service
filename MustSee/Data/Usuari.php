@@ -1,4 +1,6 @@
 <?php
+namespace MustSee\Data;
+
 class Usuari{
     private $id;
     private $nom;

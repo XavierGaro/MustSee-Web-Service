@@ -1,4 +1,5 @@
 <?php
+namespace MustSee\Data;
 
 class Lloc
 {
