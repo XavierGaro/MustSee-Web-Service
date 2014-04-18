@@ -4,65 +4,36 @@ require_once 'MustSee/Database/DatabaseManager.php';
 require_once 'Serializer/SerializerFactory.php';
 \Slim\Slim::registerAutoloader();
 
-//define('ENCODING', 'iso-8859-1');
-define('ENCODING', 'UTF-8');
+define('ENCODING', 'utf-8');
 
 $app = new \Slim\Slim();
+$dbm = MustSee\Database\DataBaseManager::getInstance('MySQL');
 
-$dbm        = MustSee\Database\DataBaseManager::getInstance('MySQL');
-$serializer = \Serializer\SerializerFactory::getInstance('xml');
+$app->view->setData(array('encoding' => ENCODING));
 
+$app->get('/xml/:query+', function () use ($app) {
+    // Es un fitxer XML
+    $app->response()->header('Content-Type', 'application/xml;charset=' . ENCODING);
+    $app->template   = "XMLTemplate.php";
+    $app->serializer = \Serializer\SerializerFactory::getInstance('xml');
+    $app->pass();
+});
 
-$app->get('/', function () use ($dbm, $serializer) {
-    echo "Root!"; // TODO: Redirigir a la pagina principal del lloc
+$app->get('/json/:query+', function () use ($app) {
+    // Es un fitxer JSON
+    $app->response()->header('Content-Type', 'application/json;charset=' . ENCODING);
+    $app->template   = "JSONTemplate.php";
+    $app->serializer = \Serializer\SerializerFactory::getInstance('json');
+    $app->pass();
 });
 
 
-// Routes per obtenir la informació via XML
-$app->group('/xml', function () use ($app, $serializer, $dbm) {
-    $app->response->headers->set('Content-Type', 'application/xml');
-
-    // Informació dels llocs
-    $app->group('/llocs', function () use ($app, $serializer, $dbm) {
-
-        // El lloc corresponen a la id
-        $app->get('/:id', function ($id) use ($app, $serializer, $dbm) {
-            $xml = $dbm->getLloc($id);
-            $app->view->setData(array(
-                            'data' => $serializer->getSerialized($xml, 'llocs'),
-                            'encoding' => ENCODING)
-            );
-            $app->render('XMLTemplate.php');
-            $app->response->setStatus(200);
-        });
-
-        // Tots els llocs
-        $app->get('/', function () use ($app, $serializer, $dbm) {
-            $xml = $dbm->getLlocs();
-            $app->view->setData(array(
-                            'data' => $serializer->getSerialized($xml, 'llocs'),
-                            'encoding' => ENCODING)
-            );
-            $app->render('XMLTemplate.php');
-            $app->response->setStatus(200);
-        });
-    });
-
-    // Informació de les categories
-    $app->get('/categories', function () use ($app, $serializer, $dbm) {
-        $xml = $dbm->getCategories();
-        $app->view->setData(array(
-                        'data' => $serializer->getSerialized($xml, 'categories'),
-                        'encoding' => ENCODING)
-        );
-        $app->render('XMLTemplate.php');
-        $app->response->setStatus(200);
-    });
-
+$app->group('/xml', function () use ($app, $dbm) {
+    require 'routes/common.php';
 });
-// para pasar a los Templates
-// 'encoding' = utf-8
-// 'data' = data per mostrar
 
+$app->group('/json', function () use ($app, $dbm) {
+    require 'routes/common.php';
+});
 
 $app->run();

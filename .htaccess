@@ -1,4 +1,4 @@
-RewriteBase /webservertests/
+RewriteBase /webservice/
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$ %{ENV:BASE}routes.php [QSA,L]

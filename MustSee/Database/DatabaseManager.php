@@ -70,7 +70,6 @@ class DataBaseManager {
                     $categoria['id_categoria']
             ));
         }
-
         return $categories;
     }
 

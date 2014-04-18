@@ -20,7 +20,7 @@ class SerializerFactory {
                 return new XMLSerializer($default_node);
 
             case 'json':
-                // TODO: return new JSONSerializer($default_node);
+                return new JSONSerializer($default_node);
 
             default:
                 throw new \Exception("Error, no es pot serialitzar a aquest format.");
