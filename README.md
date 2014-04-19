@@ -3,6 +3,8 @@ MustSee-Web-Service
 
 Web Service per accedir a la base de dades desde la aplicació MustSee.
 
+NOTA: Requereix un servidor amb PHP 5.4>=
+
 Perquè funcioni correctament s'ha de crear al directori arrel de la aplicació un arxiu anomenat db_config.ini amb el següent contingut:
 
 db_host = "el teu host"
