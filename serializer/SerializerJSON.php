@@ -2,7 +2,7 @@
 
 namespace Serializer;
 
-class JSONSerializer implements Serializer{
+class SerializerJSON implements Serializer{
 
 
     /**

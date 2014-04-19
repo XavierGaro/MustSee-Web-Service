@@ -6,12 +6,14 @@ use Serializer\SerializerFactory;
 use Slim\Slim;
 
 class Router {
+
+    const RESOURCE_INT = '[\d]+\..*';
+
     private $app;
     private $dbm;
     private $serializer;
     private $template;
     private $formats;
-    private $charSet = 'utf-8'; // Valor per defecte
 
     private $format;
 
@@ -22,7 +24,6 @@ class Router {
 
     public function run() {
         $this->format = $this->getFormat();
-        $this->app->view()->setData(array('encoding' => $this->charSet));
         $this->setResponse();
         $this->processRoute();
         $this->app->run();
@@ -31,10 +32,6 @@ class Router {
 
     public function setFormats(array $formats) {
         $this->formats = $formats;
-    }
-
-    public function setCharset($charSet) {
-        $this->charSet = $charSet;
     }
 
     private function getFormat() {
@@ -65,25 +62,28 @@ class Router {
     }
 
     private function setResponse() {
-        $this->app->response()->header('Content-Type', $this->formats[$this->format] . ';
-        charset=' . $this->charSet);
+        $this->app->response()->header('Content-Type', $this->formats[$this->format] . ";charset=utf-8");
         $this->serializer = SerializerFactory::getInstance($this->format);
         $this->template   = 'template' . strtoupper($this->format) . ".php";
     }
 
     private function processRoute() {
-        // require '../../routes/v2.php';
         $this->app->response->setStatus(200); // Si no hi ha cap problema el resultat serà aquest.
 
-        $this->app->get('/v2/:llocs', array($this, 'noParams'), array($this, 'getLlocs'))
+        $this->app->get('/v1/:llocs', array($this, 'noParams'), array($this, 'getLlocs'))
                 ->conditions(array('llocs' => 'llocs.\w+'));
 
-        $this->app->get('/v2/llocs/:id', array($this, 'getLloc'))
-                ->conditions(array('id' => '[\d]+\..*'));
+        $this->app->get('/v1/llocs/:id', array($this, 'getLloc'))
+                ->conditions(array('id' => self::RESOURCE_INT));
 
-        $this->app->get('/v2/:categories', array($this, 'noParams'), array($this, 'getCategories'))
+        $this->app->get('/v1/:categories', array($this, 'noParams'), array($this, 'getCategories'))
                 ->conditions(array('categories' => 'categories.\w+'));
 
+        $this->app->get('/v1/comentaris/usuari/:id', array($this, 'getComentarisFromUsuari'))
+                ->conditions(array('id' => self::RESOURCE_INT));
+
+        $this->app->get('/v1/comentaris/llocs/:id', array($this, 'getComentarisFromLlocs'))
+                ->conditions(array('id' => self::RESOURCE_INT));
 
         $this->app->get('/:error+', array($this,
                 'exceptionNotFound'));
@@ -91,13 +91,11 @@ class Router {
 
     function setRender($data, $default_node) {
         $this->app->view()->setData(array(
-                        'data'     => $this->serializer->getSerialized($data, $default_node),
-                        'encoding' => $this->charSet)
+                        'data' => $this->serializer->getSerialized($data, $default_node))
         );
         $this->app->render($this->template);
     }
 
-    /* AIXO ES POT POSAR EN EL REQUIRE */
     public function getLlocs() {
         $data = $this->dbm->getLlocs();
         $this->setRender($data, 'llocs');
@@ -113,14 +111,22 @@ class Router {
         $this->setRender($data, 'categories');
     }
 
+    public function getComentarisFromUsuari($id) {
+        $data = $this->dbm->getComentarisFromUsuari($id);
+        $this->setRender($data, 'comentaris');
+    }
+
+    public function getComentarisFromLlocs($id) {
+        $data = $this->dbm->getComentarisFromLloc($id);
+        $this->setRender($data, 'comentaris');
+    }
+
     // Middleware
     public function noParams(\Slim\Route $route) {
         $params = $route->getParams();
-        print_r($params);
-
         if (count($params) > 1 || strpos(array_shift($params), '/') !== false) {
             // Conte una barra o hi ha més d'un paràmetre, no es vàlid
-            $this->app->redirect('/api/error');
+            $this->app->pass();
         }
     }
 

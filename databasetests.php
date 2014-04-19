@@ -5,7 +5,7 @@ require_once 'classes/Data/Lloc.php';
 require_once 'classes/Data/Imatge.php';
 require_once 'classes/Data/Comentari.php';
 require_once 'classes/Data/Usuari.php';
-require_once 'classes/Serializer/XMLSerializer.php';
+require_once 'classes/Serializer/SerializerXML.php';
 
 
 $dbm = DataBaseManager::getInstance('MySQL');
