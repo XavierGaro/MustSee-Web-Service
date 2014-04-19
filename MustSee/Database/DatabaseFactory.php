@@ -17,18 +17,20 @@ class DatabaseFactory {
     /**
      * Retorna un objecte PDO inicialitzat amb les dades passades com argument.
      *
-     * @param string $driver    nom del sistema gestor de base de dades
-     * @param array  $variables array associatiu amb les variables per crear la connexió
+     * @param array $config array associatiu amb les variables per crear la connexió,
+     *                      aquestes variables han de ser: db_driver, db_host, db_name,
+     *                      db_user i db_pass
      * @throws \Exception si no el tipus de base de dades no es vàlid
+     * @internal param string $driver nom del sistema gestor de base de dades
      * @return \PDO correctament inicialitzat
      */
-    public static function getConnection($driver, $variables) {
-        switch ($driver) {
-            case 'MySQL':
-                return DatabaseFactory::getInstanceMySQL($variables);
+    public static function getConnection($config) {
+        switch (strtolower($config['db_driver'])) {
+            case 'mysql':
+                return DatabaseFactory::getInstanceMySQL($config);
 
-            case 'PostgreSQL':
-                return DatabaseFactory::getInstancePostgreSQL($variables);
+            case 'postgresql':
+                return DatabaseFactory::getInstancePostgreSQL($config);
 
             default:
                 throw new \Exception('El tipus de base de dades no es vàlid');
@@ -71,6 +73,7 @@ class DatabaseFactory {
         } catch (\PDOException $ex) {
             print($ex->getMessage());
         }
+
         return $pdo;
     }
 } 
