@@ -177,7 +177,7 @@ class Slim
         // Default view
         $this->container->singleton('view', function ($c) {
             $viewClass = $c['settings']['view'];
-            $templatesPath = $c['settings']['Templates.path'];
+            $templatesPath = $c['settings']['templates.path'];
 
             $view = ($viewClass instanceOf \Slim\View) ? $viewClass : new $viewClass;
             $view->setTemplatesDirectory($templatesPath);
@@ -294,7 +294,7 @@ class Slim
             'log.level' => \Slim\Log::DEBUG,
             'log.enabled' => true,
             // View
-            'Templates.path' => './Templates',
+            'templates.path' => './templates',
             'view' => '\Slim\View',
             // Cookies
             'cookies.encrypt' => false,
@@ -726,7 +726,7 @@ class Slim
                 $this->view = new $viewClass();
             }
             $this->view->appendData($existingData);
-            $this->view->setTemplatesDirectory($this->config('Templates.path'));
+            $this->view->setTemplatesDirectory($this->config('templates.path'));
         }
 
         return $this->view;

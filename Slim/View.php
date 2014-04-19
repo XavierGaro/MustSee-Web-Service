@@ -50,13 +50,13 @@ namespace Slim;
 class View
 {
     /**
-     * Data available to the view Templates
+     * Data available to the view templates
      * @var \Slim\Helper\Set
      */
     protected $data;
 
     /**
-     * Path to Templates base directory (without trailing slash)
+     * Path to templates base directory (without trailing slash)
      * @var string
      */
     protected $templatesDirectory;
@@ -198,7 +198,7 @@ class View
      *******************************************************************************/
 
     /**
-     * Set the base directory that contains view Templates
+     * Set the base directory that contains view templates
      * @param   string $directory
      * @throws  \InvalidArgumentException If directory is not a directory
      */
@@ -208,7 +208,7 @@ class View
     }
 
     /**
-     * Get Templates base directory
+     * Get templates base directory
      * @return string
      */
     public function getTemplatesDirectory()
@@ -217,8 +217,8 @@ class View
     }
 
     /**
-     * Get fully qualified path to template file using Templates base directory
-     * @param  string $file The template file pathname relative to Templates base directory
+     * Get fully qualified path to template file using templates base directory
+     * @param  string $file The template file pathname relative to templates base directory
      * @return string
      */
     public function getTemplatePathname($file)
@@ -235,7 +235,7 @@ class View
      *
      * This method echoes the rendered template to the current output buffer
      *
-     * @param  string   $template   Pathname of template file relative to Templates directory
+     * @param  string   $template   Pathname of template file relative to templates directory
      * @param  array    $data       Any additonal Data to be passed to the template.
      */
     public function display($template, $data = null)

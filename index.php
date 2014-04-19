@@ -1,14 +1,14 @@
 <?php
 //require 'vendor/autoload.php';
 require_once 'Slim/Slim.php';
-require 'Templates/CustomView.php';
+require 'templates/CustomView.php';
 
 
 
 // create new Slim instance
 $app = new Slim();
 /*$app = new \Slim\Slim(array(
-    'Templates.path' => './Templates', // este es el valor por defecto, no hace nada
+    'templates.path' => './templates', // este es el valor por defecto, no hace nada
     'view' => new CustomView() // asignamos una vista personalizada
     ));
 */

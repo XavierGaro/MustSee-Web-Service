@@ -1,14 +1,18 @@
 <?php
 
+use MustSee\Database\DataBaseManager;
+use MustSee\Router\Router;
+
 require_once 'Slim/Slim.php';
 require_once 'MustSee/Database/DatabaseManager.php';
+require_once 'MustSee/Router/Router.php';
 require_once 'Serializer/SerializerFactory.php';
 \Slim\Slim::registerAutoloader();
 
 define('ENCODING', 'utf-8');
 
 $app = new \Slim\Slim();
-$dbm = MustSee\Database\DataBaseManager::getInstance('MySQL');
+$dbm = DataBaseManager::getInstance('MySQL');
 
 $app->view->setData(array('encoding' => ENCODING));
 
@@ -18,7 +22,14 @@ $formats = array(
         'json' => 'application/json'
 );
 
-// Obtenim el format
+
+
+$router= new Router($dbm, $app);
+$router->setFormats($formats);
+$router->run();
+
+
+/*// Obtenim el format
 $format = getFormat($app, $formats);
 
 // Preparem la resposta
@@ -57,41 +68,16 @@ function setResponse($app, $format, $formats) {
     $app->serializer = \Serializer\SerializerFactory::getInstance($format);
 }
 
+
 $app->group('/v1', function () use ($app, $dbm) {
     require 'routes/v1.php';
 });
 
-
-/*
-
-
-$app->get('/xml/:query+', function () use ($app) {
-    // Es un fitxer XML
-    $app->response()->header('Content-Type', 'application/xml;charset=' . ENCODING);
-    $app->template   = "XMLTemplate.php";
-    $app->serializer = \Serializer\SerializerFactory::getInstance('xml');
-    $app->pass();
-});
-
-$app->get('/json/:query+', function () use ($app) {
-    // Es un fitxer JSON
-    $app->response()->header('Content-Type', 'application/json;charset=' . ENCODING);
-    $app->template   = "JSONTemplate.php";
-    $app->serializer = \Serializer\SerializerFactory::getInstance('json');
-    $app->pass();
+$app->group('/v2', function () {
+    require 'routes/v2.php';
 });
 
 
-$app->group('/xml', function () use ($app, $dbm) {
-    require 'routes/v1.php';
-});
 
-$app->group('/json', function () use ($app, $dbm) {
-    require 'routes/v1.php';
-});
+$app->run();
 */
-
-$router= new \MustSee\Router($dbm, $app);
-$router->run();
-
-//$app->run();
