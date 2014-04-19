@@ -1,5 +1,6 @@
 <?php
 namespace MustSee\Database;
+
 use MustSee\Data\Categoria;
 use MustSee\Data\Comentari;
 use MustSee\Data\Imatge;
@@ -8,7 +9,8 @@ use MustSee\Data\Usuari;
 
 /**
  * Class DataBaseManager
- * Classe per gestionar els objectes de la aplicació Mustsee emmagatzematas a la base de dades.
+ * Classe per gestionar els objectes de la aplicació Mustsee emmagatzemats a la base de dades.
+ * TODO: Si no es troba cap resultat s'ha de retornar null.
  *
  * @author Xavier García
  */
@@ -70,6 +72,7 @@ class DataBaseManager {
                     $categoria['id_categoria']
             ));
         }
+
         return $categories;
     }
 
