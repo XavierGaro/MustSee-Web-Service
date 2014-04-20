@@ -6,8 +6,6 @@ use Serializer\SerializerFactory;
 use Slim\Slim;
 
 class RouteManager {
-
-    //const RESOURCE_INT = '[\d]+\..*';
     const RESOURCE_INT = '[\d]+.*';
 
     const NOT_FOUND_MSG  = "Error, no s'ha trobat el recurs.";
@@ -15,9 +13,6 @@ class RouteManager {
 
     const INVALID_FORMAT_MSG  = "No es reconeix el format demanat.";
     const INVALID_FORMAT_CODE = 500;
-
-
-
 
     /** @var \Slim\Slim */
     private $app;
@@ -32,24 +27,23 @@ class RouteManager {
 
     public $routes;
 
-    private $stopRouting = false;
-
-
     public function __construct(Slim $app) {
-        $this->app    = $app;
-        $this->routes = array();
+        $this->app     = $app;
+        $this->routes  = array();
+        $this->formats = SerializerFactory::getFormats();
     }
 
     public function run() {
-        $this->getAcceptedFormat();
-        $this->setResponse();
-        $this->processRoute();
-        $this->app->run();
-
-    }
-
-    public function setFormats(array $formats) {
-        $this->formats = $formats;
+        try {
+            $this->getAcceptedFormat();
+            $this->setResponse();
+            $this->processRoutes();
+            $this->app->run();
+        } catch (\Slim\Exception\Stop $e) {
+            // S'ha produït una excepció d'aturada, es el comportament esperat del framework
+        } catch (\Slim\Exception\Pass $e) {
+            // S'ha produït una excepció d'aturada, es el comportament esperat del framework
+        }
     }
 
     private function getAcceptedFormat() {
@@ -60,12 +54,12 @@ class RouteManager {
         $dotPos = strpos($path, '.');
         $format = substr($path, $dotPos + 1);
 
-        // Comprovem que no hi hagi cap barra, i es trobi al array de formats.
-        if ($format !== false && strstr($format, '/') == false && array_key_exists($format,
-                        $this->formats)
-        ) {
-            $this->format = $format;
-
+        // Comprovem que no hi hagi cap barra
+        if ($format !== false && strstr($format, '/') == false) {
+            // Comprovem que sigui un format vàlid
+            if (array_key_exists($format, $this->formats)) {
+                $this->format = $format;
+            }
         } else {
             // Si no s'ha trobat cap format vàlid comprovem el tipus de fitxer acceptat
             $accept = $this->app->request->headers->get('Accept');
@@ -81,60 +75,60 @@ class RouteManager {
         if ($this->format === null) {
             reset($this->formats);
             $this->format = key($this->formats);
+
+            // En aquest put no hi ha response?
+            $this->app->response->headers()->set('Content-Type', 'application/json');
             $this->setResponse();
+            /* Afegim les dades de la capçalera, com que no s'executa Slim::run() l'objecte
+             response no s'envia correctament*/
+            header('HTTP/1.0 500 Unknown Format');
+            header("Content-type: {$this->formats[$this->format]}; charset=utf-8");
             $this->renderError(self::INVALID_FORMAT_MSG, self::INVALID_FORMAT_CODE);
+            echo "hola";
         }
     }
 
     private function setResponse() {
-        $this->app->response()->header('Content-Type', $this->formats[$this->format] . ";charset=utf-8");
+        $this->app->response->headers->set('Content-Type', $this->formats[$this->format] . ";
+        charset=utf-8");
         $this->serializer = SerializerFactory::getInstance($this->format);
         $this->template   = 'template' . strtoupper($this->format) . ".php";
     }
 
-    private function processRoute() {
- //       if ($this->stopRouting !== true) {
-            $this->app->response->setStatus(200); // Si no hi ha cap problema el resultat serà aquest.
+    private function processRoutes() {
+        $this->app->response->setStatus(200); // Si no hi ha cap problema el resultat serà aquest.
 
+        foreach ($this->routes as $r) {
+            /** @var $r Route */
+            $r->setRouteManager($this);
 
-            foreach ($this->routes as $r) {
-                /** @var $r Route */
-                $r->setRouteManager($this);
+            switch ($r->verb) {
+                case 'GET':
+                    if (is_callable($r->middleware)) {
+                        $this->app->get($r->route, $r->middleware, array($r, 'processRoute'))
+                                ->conditions($r->condition);
+                    } else {
+                        $this->app->get($r->route, array($r, 'processRoute'))
+                                ->conditions($r->condition);
+                    }
+                    break;
 
-                switch ($r->verb) {
-                    case 'GET':
-                        if (is_callable($r->middleware)) {
-                            $this->app->get($r->route, $r->middleware, array($r, 'processRoute'))
-                                    ->conditions($r->condition);
-                        } else {
-                            $this->app->get($r->route, array($r, 'processRoute'))
-                                    ->conditions($r->condition);
-                        }
-                        break;
-
-                    case 'POST':
-                        if (is_callable($r->middleware)) {
-                            $this->app->post($r->route, $r->middleware, array($r, 'processRoute'))
-                                    ->conditions($r->condition);
-                        } else {
-                            $this->app->post($r->route, array($r, 'processRoute'))
-                                    ->conditions($r->condition);
-                        }
-                        break;
-                }
+                case 'POST':
+                    if (is_callable($r->middleware)) {
+                        $this->app->post($r->route, $r->middleware, array($r, 'processRoute'))
+                                ->conditions($r->condition);
+                    } else {
+                        $this->app->post($r->route, array($r, 'processRoute'))
+                                ->conditions($r->condition);
+                    }
+                    break;
             }
-
-
-            // Rutes comuns
-            $this->app->map('/:error+', array($this, 'renderNotFound'))->via('GET', 'POST',
-                    'DELETE', 'PUT');
-/*
-        } else {
-            // No es processa cap ruta
-            $this->app->map('/:sortir+', array($this, 'sortir'))->via('GET', 'POST',
-                    'DELETE', 'PUT');
         }
-*/
+
+
+        // Rutes comuns
+        $this->app->map('/:error+', array($this, 'renderNotFound'))->via('GET', 'POST',
+                'DELETE', 'PUT');
     }
 
     function render($data, $default_node) {
@@ -148,20 +142,15 @@ class RouteManager {
     després a renderError() per poder fer servir els arguments per defecte */
     public function renderNotFound() {
         $this->renderError(self::NOT_FOUND_MSG, self::NOT_FOUND_CODE);
-
     }
 
     // Mostra l'error i atura la execució
     public function renderError($missatge, $codi) {
         $this->app->response->setStatus($codi);
         $this->render(['error' => $codi, 'message' => $missatge], 'error');
-        //$this->stopRouting = true;
         $this->app->stop($codi);
     }
 
-    public function sortir() {
-        // No fem res
-    }
 
     public function addRoute(Route $route) {
         $this->routes[] = $route;

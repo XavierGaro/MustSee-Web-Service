@@ -33,7 +33,7 @@ class Route {
 
         // Si les dades son un objecte null o un array buit, mostrem el missatge d'error
         if ($data === null || (is_array($data) && empty($data))) {
-            $this->routeManager->renderError();
+            $this->routeManager->renderError(RouteManager::NOT_FOUND_MSG, RouteManager::NOT_FOUND_CODE);
         } else {
             $this->routeManager->render($data, $this->node);
         }

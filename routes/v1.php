@@ -9,7 +9,7 @@ $routes[] = new Route(
         "GET",
         "/$version/:llocs",
         array($dbm, 'getLlocs'),
-        array('llocs' => 'llocs(\.\w+)'),
+        array('llocs' => 'llocs(\.\w+)?'),
         'llocs',
         array($routeManager, 'noParams')
 );
@@ -26,7 +26,7 @@ $routes[] = new Route(
         "GET",
         "/$version/:categories",
         array($dbm, 'getCategories'),
-        array('categories' => 'categories(\.\w+)'),
+        array('categories' => 'categories(\.\w+)?'),
         'categories',
         array($routeManager, 'noParams')
 );
@@ -47,7 +47,6 @@ $routes[] = new Route(
         'comentaris'
 );
 
-
 // middleware
 $authenticateForRole = function (DataBaseManager $dbm, RouteManager $routeManager) {
     return function () use ($dbm, $routeManager) {
@@ -62,11 +61,13 @@ $authenticateForRole = function (DataBaseManager $dbm, RouteManager $routeManage
 //middleware
 $postComment = function (DataBaseManager $dbm, RouteManager $routeManager) {
     return function ($id) use ($dbm, $routeManager) {
+        // Sanegem les dades abans de fer la consulta
         $comentari = htmlspecialchars($_POST['comentari'], ENT_QUOTES);
-        $id_usuari    = htmlspecialchars($_POST['id'], ENT_QUOTES);
+        $correu = htmlspecialchars($_POST['correu'], ENT_QUOTES);
 
         try {
-            $dbm->addComentariToLloc($id, $id_usuari, $comentari);
+            $dbm->addComentariToLloc($id, $correu, $comentari);
+
             return ['message' => "S'ha afegit el comentari correctament"];
 
         } catch (Exception $ex) {
@@ -85,5 +86,5 @@ $routes[] = new Route(
 );
 
 
-$routeManager->addRoutes($routes);
+
 

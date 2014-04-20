@@ -10,19 +10,12 @@ require_once 'MustSee/Database/DatabaseManager.php';
 require_once 'MustSee/Router/RouteManager.php';
 \Slim\Slim::registerAutoloader();
 
-$app    = new \Slim\Slim();
+$app = new \Slim\Slim();
+
 $config = parse_ini_file('db_config.ini');
+
 /** @var DataBaseManager $dbm */
 $dbm = DataBaseManager::getInstance($config);
-
-
-// Formats supportats pel serializar
-// TODO: Moure a la factoria i que els agafi d'allà directament el RouteManager
-$formats = array(
-        'xml'  => 'application/xml',
-        'json' => 'application/json'
-);
-
 
 $routeManager = new RouteManager($app);
 
@@ -31,7 +24,9 @@ $routeManager = new RouteManager($app);
 require_once 'routes/v1.php';
 
 
-$routeManager->setFormats($formats);
+$routeManager->addRoutes($routes);
+
+
 $routeManager->run();
 
 

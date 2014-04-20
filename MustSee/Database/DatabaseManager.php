@@ -225,8 +225,8 @@ class DataBaseManager {
      * @param integer $id id del usuari.
      * @return Usuari dades del usuari.
      */
-    public function getUsuari($id) {
-        $statement = $this->pdo->prepare('SELECT correu, nom, cognom FROM users INNER JOIN perfil ON (users_id_usuari = id_usuari) WHERE id_usuari = ?');
+    public function getUsuariById($id) {
+        $statement = $this->pdo->prepare('SELECT correu, nom, cognom, id_usuari FROM users INNER JOIN perfil ON (users_id_usuari = id_usuari) WHERE id_usuari = ?');
         $statement->bindValue(1, $id, \PDO::PARAM_INT);
         $statement->execute();
 
@@ -234,7 +234,31 @@ class DataBaseManager {
             $usuari = new Usuari(
                     $result['nom'] . ' ' . $result['cognom'],
                     $result['correu'],
-                    $id
+                    $result['id_usuari']
+            );
+
+            return $usuari;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Recupera les dades del usuari corresponent al correu passat com argument.
+     *
+     * @param $correu correu del usuari
+     * @return Usuari dades del usuari.
+     */
+    public function getUsuariByCorreu($correu) {
+        $statement = $this->pdo->prepare('SELECT correu, nom, cognom, id_usuari FROM users INNER JOIN perfil ON (users_id_usuari = id_usuari) WHERE correu = ?');
+        $statement->bindValue(1, $correu, \PDO::PARAM_STR);
+        $statement->execute();
+
+        if ($result = $statement->fetch()) {
+            $usuari = new Usuari(
+                    $result['nom'] . ' ' . $result['cognom'],
+                    $result['correu'],
+                    $result['id_usuari']
             );
 
             return $usuari;
@@ -267,7 +291,7 @@ class DataBaseManager {
         }
     }
 
-    public function addComentariToLloc($idLloc, $idUsuari, $comentari) {
+    public function addComentariToLloc($idLloc, $correu, $comentari) {
         // Comprovem si existeix el lloc
         if ($this->getLloc($idLloc)===null) {
             throw new \Exception('El lloc no existeix');
@@ -275,6 +299,9 @@ class DataBaseManager {
 
         // Obtenim la data d'avui
         $today = date("m.d.y");
+
+        // Obtenim la id del usuari
+        $idUsuari = $this->getUsuariByCorreu($correu)->getId();
 
         $statement = $this->pdo->prepare('INSERT INTO comentaris(text, data_publi,
         llocs_id_llocs, perfil_users_id_usuari) VALUES (?, ?, ?, ?)');
