@@ -266,4 +266,25 @@ class DataBaseManager {
             return false;
         }
     }
+
+    public function addComentariToLloc($idLloc, $idUsuari, $comentari) {
+        // Comprovem si existeix el lloc
+        if ($this->getLloc($idLloc)===null) {
+            throw new \Exception('El lloc no existeix');
+        }
+
+        // Obtenim la data d'avui
+        $today = date("m.d.y");
+
+        $statement = $this->pdo->prepare('INSERT INTO comentaris(text, data_publi,
+        llocs_id_llocs, perfil_users_id_usuari) VALUES (?, ?, ?, ?)');
+        $statement->bindValue(1, $comentari, \PDO::PARAM_STR);
+        $statement->bindValue(2, $today, \PDO::PARAM_STR);
+        $statement->bindValue(3, $idLloc, \PDO::PARAM_INT);
+        $statement->bindValue(4, $idUsuari, \PDO::PARAM_INT);
+
+        if ($statement->execute()===false) {
+            throw new \Exception('Error al inserir el comentari');
+        }
+    }
 }

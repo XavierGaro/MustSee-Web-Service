@@ -13,9 +13,14 @@ class RouteManager {
     const NOT_FOUND_MSG  = "Error, no s'ha trobat el recurs.";
     const NOT_FOUND_CODE = 400;
 
+    const INVALID_FORMAT_MSG  = "No es reconeix el format demanat.";
+    const INVALID_FORMAT_CODE = 500;
+
+
+
+
     /** @var \Slim\Slim */
     private $app;
-
 
     /** @var Serializer */
     private $serializer;
@@ -36,11 +41,10 @@ class RouteManager {
     }
 
     public function run() {
-        $this->getFormat();
+        $this->getAcceptedFormat();
         $this->setResponse();
         $this->processRoute();
         $this->app->run();
-
 
     }
 
@@ -48,7 +52,7 @@ class RouteManager {
         $this->formats = $formats;
     }
 
-    private function getFormat() {
+    private function getAcceptedFormat() {
         // Comprovem si s'ha especificat una extensió a la ruta
         $path = $this->app->request->getPath();
 
@@ -78,7 +82,7 @@ class RouteManager {
             reset($this->formats);
             $this->format = key($this->formats);
             $this->setResponse();
-            $this->renderError("No s'ha trobat cap format vàlid per tornar les dades", 500);
+            $this->renderError(self::INVALID_FORMAT_MSG, self::INVALID_FORMAT_CODE);
         }
     }
 
@@ -89,7 +93,7 @@ class RouteManager {
     }
 
     private function processRoute() {
-        if ($this->stopRouting !== true) {
+ //       if ($this->stopRouting !== true) {
             $this->app->response->setStatus(200); // Si no hi ha cap problema el resultat serà aquest.
 
 
@@ -124,12 +128,13 @@ class RouteManager {
             // Rutes comuns
             $this->app->map('/:error+', array($this, 'renderNotFound'))->via('GET', 'POST',
                     'DELETE', 'PUT');
-
+/*
         } else {
             // No es processa cap ruta
             $this->app->map('/:sortir+', array($this, 'sortir'))->via('GET', 'POST',
                     'DELETE', 'PUT');
         }
+*/
     }
 
     function render($data, $default_node) {
@@ -142,12 +147,12 @@ class RouteManager {
     /* Aquest mètode es cridat com a callback de la ruta /:error+ així que cridem a aquest i
     després a renderError() per poder fer servir els arguments per defecte */
     public function renderNotFound() {
-        $this->renderError();
+        $this->renderError(self::NOT_FOUND_MSG, self::NOT_FOUND_CODE);
 
     }
 
-    // Llença una excepció per aturar la execució, es el comportament normal del framework
-    public function renderError($missatge = self::NOT_FOUND_MSG, $codi = self::NOT_FOUND_CODE) {
+    // Mostra l'error i atura la execució
+    public function renderError($missatge, $codi) {
         $this->app->response->setStatus($codi);
         $this->render(['error' => $codi, 'message' => $missatge], 'error');
         //$this->stopRouting = true;

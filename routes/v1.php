@@ -5,11 +5,6 @@ use MustSee\Router\RouteManager;
 
 $version = basename(__FILE__, '.php');
 
-// Si no existeix una instància de la base de dades generem una
-if ($dbm === null) {
-    $dbm = DataBaseManager::getInstance($config);
-}
-
 $routes[] = new Route(
         "GET",
         "/$version/:llocs",
@@ -38,7 +33,7 @@ $routes[] = new Route(
 
 $routes[] = new Route(
         "GET",
-        "/$version/comentaris/usuari/:id",
+        "/$version/comentaris/usuaris/:id",
         array($dbm, 'getComentarisFromUsuari'),
         array('id' => RouteManager::RESOURCE_INT),
         'comentaris'
@@ -46,43 +41,47 @@ $routes[] = new Route(
 
 $routes[] = new Route(
         "GET",
-        "/v1/comentaris/llocs/:id",
+        "/$version/comentaris/llocs/:id",
         array($dbm, 'getComentarisFromLloc'),
         array('id' => RouteManager::RESOURCE_INT),
         'comentaris'
 );
 
 
-// TODO: ruta per afegir comentaris
-// Ha de passar per POST, i comprovar el correu i la contrasenya abans de afegir-lo
-
-
 // middleware
 $authenticateForRole = function (DataBaseManager $dbm, RouteManager $routeManager) {
     return function () use ($dbm, $routeManager) {
-        $correu = $_POST['correu'];
-        $password = $_POST['password'];
-        //$correu   = 'xavierTest@hotmail.com'; // TODO: Extreure de variables POST i SANEJAR
-        //$password = '123456---'; // TODO: Extreure de variables POST i SANEJAR
-
+        $correu   = htmlspecialchars($_POST['correu'], ENT_QUOTES);
+        $password = htmlspecialchars($_POST['password'], ENT_QUOTES);
         if ($dbm->comprovarContrasenya($correu, $password) === false) {
             $routeManager->renderError("Error al autenticar", 500);
         }
     };
 };
 
-$mw = function() {
-    echo "This is middleware!";
+//middleware
+$postComment = function (DataBaseManager $dbm, RouteManager $routeManager) {
+    return function ($id) use ($dbm, $routeManager) {
+        $comentari = htmlspecialchars($_POST['comentari'], ENT_QUOTES);
+        $id_usuari    = htmlspecialchars($_POST['id'], ENT_QUOTES);
+
+        try {
+            $dbm->addComentariToLloc($id, $id_usuari, $comentari);
+            return ['message' => "S'ha afegit el comentari correctament"];
+
+        } catch (Exception $ex) {
+            $routeManager->renderError("Error al afegir el comentari", 500);
+        }
+    };
 };
 
 $routes[] = new Route(
         "POST",
-        "/$version/:llocs",
-        array($dbm, 'getCategories'),
-        array('llocs' => 'llocs(\.\w+)'),
-        'llocs',
+        "/$version/comentaris/llocs/:id",
+        $postComment($dbm, $routeManager),
+        array('id' => RouteManager::RESOURCE_INT),
+        'comentari',
         $authenticateForRole($dbm, $routeManager)
-    // array($router, 'auth')
 );
 
 
