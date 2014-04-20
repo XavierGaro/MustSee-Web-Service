@@ -9,7 +9,7 @@ namespace Serializer;
  *
  * @author Xavier García
  */
-class XMLSerializer implements Serializer {
+class SerializerXML implements Serializer {
 
     public function getSerialized($data, $node = SerializerFactory::DEFAULT_NODE) {
         // Comprovem quin tipus de valor s'ha rebut

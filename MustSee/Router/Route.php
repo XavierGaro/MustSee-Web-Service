@@ -2,6 +2,7 @@
 namespace MustSee\Router;
 
 class Route {
+    public $verb;
     public $route;
     public $function;
     public $condition;
@@ -13,9 +14,9 @@ class Route {
     /** @var  RouteManager */
     private $routeManager;
 
-    public function __construct($route, $function, array $condition, $node = 'node',
+    public function __construct($verb, $route, $function, array $condition, $node = 'node',
                                 $middleware = null) {
-        $this->route      = $route;
+        $this->verb       = $verb;
         $this->route      = $route;
         $this->function   = $function;
         $this->condition  = $condition;
@@ -31,7 +32,7 @@ class Route {
         $data = call_user_func($this->function, $param);
 
         // Si les dades son un objecte null o un array buit, mostrem el missatge d'error
-        if ($data===null || (is_array($data) && empty($data))) {
+        if ($data === null || (is_array($data) && empty($data))) {
             $this->routeManager->renderError();
         } else {
             $this->routeManager->render($data, $this->node);

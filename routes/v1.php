@@ -1,57 +1,90 @@
 <?php
+use MustSee\Database\DataBaseManager;
 use MustSee\Router\Route;
 use MustSee\Router\RouteManager;
 
-define ('VERSION', 'v1');
+$version = basename(__FILE__, '.php');
+
+// Si no existeix una instància de la base de dades generem una
+if ($dbm === null) {
+    $dbm = DataBaseManager::getInstance($config);
+}
 
 $routes[] = new Route(
-        '/v1/:llocs',
+        "GET",
+        "/$version/:llocs",
         array($dbm, 'getLlocs'),
-        array('llocs' => 'llocs\.\w+'),
+        array('llocs' => 'llocs(\.\w+)'),
         'llocs',
-        array($router, 'noParams')
+        array($routeManager, 'noParams')
 );
 
 $routes[] = new Route(
-        '/v1/llocs/:id',
+        "GET",
+        "/$version/llocs/:id",
         array($dbm, 'getLloc'),
         array('id' => RouteManager::RESOURCE_INT),
         'llocs'
 );
 
 $routes[] = new Route(
-        '/v1/:categories',
+        "GET",
+        "/$version/:categories",
         array($dbm, 'getCategories'),
-        array('categories' => 'categories.\w+'),
+        array('categories' => 'categories(\.\w+)'),
         'categories',
-        array($router, 'noParams')
+        array($routeManager, 'noParams')
 );
 
 $routes[] = new Route(
-        '/v1/comentaris/usuari/:id',
+        "GET",
+        "/$version/comentaris/usuari/:id",
         array($dbm, 'getComentarisFromUsuari'),
         array('id' => RouteManager::RESOURCE_INT),
         'comentaris'
 );
 
 $routes[] = new Route(
-        '/v1/comentaris/llocs/:id',
+        "GET",
+        "/v1/comentaris/llocs/:id",
         array($dbm, 'getComentarisFromLloc'),
         array('id' => RouteManager::RESOURCE_INT),
         'comentaris'
 );
 
-// Exemple amb dos middleware
+
+// TODO: ruta per afegir comentaris
+// Ha de passar per POST, i comprovar el correu i la contrasenya abans de afegir-lo
+
+
+// middleware
+$authenticateForRole = function (DataBaseManager $dbm, RouteManager $routeManager) {
+    return function () use ($dbm, $routeManager) {
+        $correu = $_POST['correu'];
+        $password = $_POST['password'];
+        //$correu   = 'xavierTest@hotmail.com'; // TODO: Extreure de variables POST i SANEJAR
+        //$password = '123456---'; // TODO: Extreure de variables POST i SANEJAR
+
+        if ($dbm->comprovarContrasenya($correu, $password) === false) {
+            $routeManager->renderError("Error al autenticar", 500);
+        }
+    };
+};
+
+$mw = function() {
+    echo "This is middleware!";
+};
+
 $routes[] = new Route(
-        '/v1/:llacs',
-        array($dbm, 'getLlocs'),
-        array('llocs' => 'llocs.\w+'),
+        "POST",
+        "/$version/:llocs",
+        array($dbm, 'getCategories'),
+        array('llocs' => 'llocs(\.\w+)'),
         'llocs',
-        array(
-                array($router, 'noParams'),
-                array($router, 'noParams')
-        )
+        $authenticateForRole($dbm, $routeManager)
+    // array($router, 'auth')
 );
 
 
-$router->addRoutes($routes);
+$routeManager->addRoutes($routes);
+

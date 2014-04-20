@@ -17,13 +17,13 @@ class SerializerFactory {
     public static function getInstance($format, $default_node = self::DEFAULT_NODE) {
         switch (strtolower($format)) {
             case 'xml':
-                return new XMLSerializer($default_node);
+                return new SerializerXML($default_node);
 
             case 'json':
-                return new JSONSerializer($default_node);
+                return new SerializerJSON($default_node);
 
             default:
-                throw new \Exception("Error, no es pot serialitzar a aquest format.");
+                throw new \Exception("Error, no es pot serialitzar a aquest format: $format");
         }
     }
 }

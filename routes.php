@@ -12,7 +12,9 @@ require_once 'MustSee/Router/RouteManager.php';
 
 $app    = new \Slim\Slim();
 $config = parse_ini_file('db_config.ini');
-$dbm    = DataBaseManager::getInstance($config);
+/** @var DataBaseManager $dbm */
+$dbm = DataBaseManager::getInstance($config);
+
 
 // Formats supportats pel serializar
 // TODO: Moure a la factoria i que els agafi d'allà directament el RouteManager
@@ -22,12 +24,14 @@ $formats = array(
 );
 
 
-$router = new RouteManager($dbm, $app);
+$routeManager = new RouteManager($app);
 
 // Carregar rutes
 // TODO Fer que carregui tots els fitxers de routes/ amb el format '$v[\d]+\.php^'
 require_once 'routes/v1.php';
 
 
-$router->setFormats($formats);
-$router->run();
+$routeManager->setFormats($formats);
+$routeManager->run();
+
+
