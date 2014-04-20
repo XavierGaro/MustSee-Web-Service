@@ -41,8 +41,7 @@ namespace Slim;
  * @author  Josh Lockhart
  * @since   1.0.0
  */
-class Router
-{
+class Router {
     /**
      * @var Route The current route (most recently dispatched)
      */
@@ -71,18 +70,17 @@ class Router
     /**
      * Constructor
      */
-    public function __construct()
-    {
-        $this->routes = array();
+    public function __construct() {
+        $this->routes      = array();
         $this->routeGroups = array();
     }
 
     /**
      * Get Current Route object or the first matched one if matching has been performed
+     *
      * @return \Slim\Route|null
      */
-    public function getCurrentRoute()
-    {
+    public function getCurrentRoute() {
         if ($this->currentRoute !== null) {
             return $this->currentRoute;
         }
@@ -96,13 +94,13 @@ class Router
 
     /**
      * Return route objects that match the given HTTP method and URI
-     * @param  string               $httpMethod   The HTTP method to match against
-     * @param  string               $resourceUri  The resource URI to match against
-     * @param  bool                 $reload       Should matching routes be re-parsed?
+     *
+     * @param  string $httpMethod  The HTTP method to match against
+     * @param  string $resourceUri The resource URI to match against
+     * @param  bool   $reload      Should matching routes be re-parsed?
      * @return array[\Slim\Route]
      */
-    public function getMatchedRoutes($httpMethod, $resourceUri, $reload = false)
-    {
+    public function getMatchedRoutes($httpMethod, $resourceUri, $reload = false) {
         if ($reload || is_null($this->matchedRoutes)) {
             $this->matchedRoutes = array();
             foreach ($this->routes as $route) {
@@ -121,10 +119,10 @@ class Router
 
     /**
      * Add a route object to the router
-     * @param  \Slim\Route     $route      The Slim Route
+     *
+     * @param  \Slim\Route $route The Slim Route
      */
-    public function map(\Slim\Route $route)
-    {
+    public function map(\Slim\Route $route) {
         list($groupPattern, $groupMiddleware) = $this->processGroups();
 
         $route->setPattern($groupPattern . $route->getPattern());
@@ -138,11 +136,11 @@ class Router
 
     /**
      * A helper function for processing the group's pattern and middleware
+     *
      * @return array Returns an array with the elements: pattern, middlewareArr
      */
-    protected function processGroups()
-    {
-        $pattern = "";
+    protected function processGroups() {
+        $pattern    = "";
         $middleware = array();
         foreach ($this->routeGroups as $group) {
             $k = key($group);
@@ -151,38 +149,39 @@ class Router
                 $middleware = array_merge($middleware, $group[$k]);
             }
         }
+
         return array($pattern, $middleware);
     }
 
     /**
      * Add a route group to the array
+     *
      * @param  string     $group      The group pattern (ie. "/books/:id")
      * @param  array|null $middleware Optional parameter array of middleware
      * @return int        The index of the new group
      */
-    public function pushGroup($group, $middleware = array())
-    {
+    public function pushGroup($group, $middleware = array()) {
         return array_push($this->routeGroups, array($group => $middleware));
     }
 
     /**
      * Removes the last route group from the array
+     *
      * @return bool    True if successful, else False
      */
-    public function popGroup()
-    {
+    public function popGroup() {
         return (array_pop($this->routeGroups) !== null);
     }
 
     /**
      * Get URL for named route
-     * @param  string               $name   The name of the route
-     * @param  array                $params Associative array of URL parameter names and replacement values
+     *
+     * @param  string $name   The name of the route
+     * @param  array  $params Associative array of URL parameter names and replacement values
      * @throws \RuntimeException            If named route not found
      * @return string                       The URL for the given route populated with provided replacement values
      */
-    public function urlFor($name, $params = array())
-    {
+    public function urlFor($name, $params = array()) {
         if (!$this->hasNamedRoute($name)) {
             throw new \RuntimeException('Named route not found for name: ' . $name);
         }
@@ -198,40 +197,40 @@ class Router
 
     /**
      * Add named route
-     * @param  string            $name   The route name
-     * @param  \Slim\Route       $route  The route object
+     *
+     * @param  string      $name  The route name
+     * @param  \Slim\Route $route The route object
      * @throws \RuntimeException         If a named route already exists with the same name
      */
-    public function addNamedRoute($name, \Slim\Route $route)
-    {
+    public function addNamedRoute($name, \Slim\Route $route) {
         if ($this->hasNamedRoute($name)) {
             throw new \RuntimeException('Named route already exists with name: ' . $name);
         }
-        $this->namedRoutes[(string) $name] = $route;
+        $this->namedRoutes[(string)$name] = $route;
     }
 
     /**
      * Has named route
-     * @param  string   $name   The route name
+     *
+     * @param  string $name The route name
      * @return bool
      */
-    public function hasNamedRoute($name)
-    {
+    public function hasNamedRoute($name) {
         $this->getNamedRoutes();
 
-        return isset($this->namedRoutes[(string) $name]);
+        return isset($this->namedRoutes[(string)$name]);
     }
 
     /**
      * Get named route
-     * @param  string           $name
+     *
+     * @param  string $name
      * @return \Slim\Route|null
      */
-    public function getNamedRoute($name)
-    {
+    public function getNamedRoute($name) {
         $this->getNamedRoutes();
         if ($this->hasNamedRoute($name)) {
-            return $this->namedRoutes[(string) $name];
+            return $this->namedRoutes[(string)$name];
         } else {
             return null;
         }
@@ -239,10 +238,10 @@ class Router
 
     /**
      * Get named routes
+     *
      * @return \ArrayIterator
      */
-    public function getNamedRoutes()
-    {
+    public function getNamedRoutes() {
         if (is_null($this->namedRoutes)) {
             $this->namedRoutes = array();
             foreach ($this->routes as $route) {

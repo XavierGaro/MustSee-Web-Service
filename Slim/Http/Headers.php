@@ -32,18 +32,17 @@
  */
 namespace Slim\Http;
 
- /**
-  * HTTP Headers
-  *
-  * @package Slim
-  * @author  Josh Lockhart
-  * @since   1.6.0
-  */
-class Headers extends \Slim\Helper\Set
-{
+/**
+ * HTTP Headers
+ *
+ * @package Slim
+ * @author  Josh Lockhart
+ * @since   1.6.0
+ */
+class Headers extends \Slim\Helper\Set {
     /********************************************************************************
-    * Static interface
-    *******************************************************************************/
+     * Static interface
+     *******************************************************************************/
 
     /**
      * Special-case HTTP headers that are otherwise unidentifiable as HTTP headers.
@@ -53,21 +52,21 @@ class Headers extends \Slim\Helper\Set
      * @var array
      */
     protected static $special = array(
-        'CONTENT_TYPE',
-        'CONTENT_LENGTH',
-        'PHP_AUTH_USER',
-        'PHP_AUTH_PW',
-        'PHP_AUTH_DIGEST',
-        'AUTH_TYPE'
+            'CONTENT_TYPE',
+            'CONTENT_LENGTH',
+            'PHP_AUTH_USER',
+            'PHP_AUTH_PW',
+            'PHP_AUTH_DIGEST',
+            'AUTH_TYPE'
     );
 
     /**
      * Extract HTTP headers from an array of Data (e.g. $_SERVER)
+     *
      * @param  array $data
      * @return array
      */
-    public static function extract($data)
-    {
+    public static function extract($data) {
         $results = array();
         foreach ($data as $key => $value) {
             $key = strtoupper($key);
@@ -83,16 +82,16 @@ class Headers extends \Slim\Helper\Set
     }
 
     /********************************************************************************
-    * Instance interface
-    *******************************************************************************/
+     * Instance interface
+     *******************************************************************************/
 
     /**
      * Transform header name into canonical form
+     *
      * @param  string $key
      * @return string
      */
-    protected function normalizeKey($key)
-    {
+    protected function normalizeKey($key) {
         $key = strtolower($key);
         $key = str_replace(array('-', '_'), ' ', $key);
         $key = preg_replace('#^http #', '', $key);

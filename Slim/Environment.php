@@ -48,8 +48,7 @@ namespace Slim;
  * @author  Josh Lockhart
  * @since   1.6.0
  */
-class Environment implements \ArrayAccess, \IteratorAggregate
-{
+class Environment implements \ArrayAccess, \IteratorAggregate {
     /**
      * @var array
      */
@@ -67,11 +66,10 @@ class Environment implements \ArrayAccess, \IteratorAggregate
      * derived from $_SERVER variables. You may override the global server
      * variables by using `\Slim\Environment::mock()` instead.
      *
-     * @param  bool             $refresh Refresh properties using global server variables?
+     * @param  bool $refresh Refresh properties using global server variables?
      * @return \Slim\Environment
      */
-    public static function getInstance($refresh = false)
-    {
+    public static function getInstance($refresh = false) {
         if (is_null(self::$environment) || $refresh) {
             self::$environment = new self();
         }
@@ -82,26 +80,25 @@ class Environment implements \ArrayAccess, \IteratorAggregate
     /**
      * Get mock environment instance
      *
-     * @param  array       $userSettings
+     * @param  array $userSettings
      * @return \Slim\Environment
      */
-    public static function mock($userSettings = array())
-    {
-        $defaults = array(
-            'REQUEST_METHOD' => 'GET',
-            'SCRIPT_NAME' => '',
-            'PATH_INFO' => '',
-            'QUERY_STRING' => '',
-            'SERVER_NAME' => 'localhost',
-            'SERVER_PORT' => 80,
-            'ACCEPT' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'ACCEPT_LANGUAGE' => 'en-US,en;q=0.8',
-            'ACCEPT_CHARSET' => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-            'USER_AGENT' => 'Slim Framework',
-            'REMOTE_ADDR' => '127.0.0.1',
-            'slim.url_scheme' => 'http',
-            'slim.input' => '',
-            'slim.errors' => @fopen('php://stderr', 'w')
+    public static function mock($userSettings = array()) {
+        $defaults          = array(
+                'REQUEST_METHOD'  => 'GET',
+                'SCRIPT_NAME'     => '',
+                'PATH_INFO'       => '',
+                'QUERY_STRING'    => '',
+                'SERVER_NAME'     => 'localhost',
+                'SERVER_PORT'     => 80,
+                'ACCEPT'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'ACCEPT_LANGUAGE' => 'en-US,en;q=0.8',
+                'ACCEPT_CHARSET'  => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+                'USER_AGENT'      => 'Slim Framework',
+                'REMOTE_ADDR'     => '127.0.0.1',
+                'slim.url_scheme' => 'http',
+                'slim.input'      => '',
+                'slim.errors'     => @fopen('php://stderr', 'w')
         );
         self::$environment = new self(array_merge($defaults, $userSettings));
 
@@ -113,8 +110,7 @@ class Environment implements \ArrayAccess, \IteratorAggregate
      *
      * @param  array|null $settings If present, these are used instead of global server variables
      */
-    private function __construct($settings = null)
-    {
+    private function __construct($settings = null) {
         if ($settings) {
             $this->properties = $settings;
         } else {
@@ -127,8 +123,8 @@ class Environment implements \ArrayAccess, \IteratorAggregate
             $env['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
 
             // Server params
-            $scriptName = $_SERVER['SCRIPT_NAME']; // <-- "/foo/index.php"
-            $requestUri = $_SERVER['REQUEST_URI']; // <-- "/foo/bar?test=abc" or "/foo/index.php/bar?test=abc"
+            $scriptName  = $_SERVER['SCRIPT_NAME']; // <-- "/foo/index.php"
+            $requestUri  = $_SERVER['REQUEST_URI']; // <-- "/foo/bar?test=abc" or "/foo/index.php/bar?test=abc"
             $queryString = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : ''; // <-- "test=abc" or ""
 
             // Physical path
@@ -179,16 +175,14 @@ class Environment implements \ArrayAccess, \IteratorAggregate
     /**
      * Array Access: Offset Exists
      */
-    public function offsetExists($offset)
-    {
+    public function offsetExists($offset) {
         return isset($this->properties[$offset]);
     }
 
     /**
      * Array Access: Offset Get
      */
-    public function offsetGet($offset)
-    {
+    public function offsetGet($offset) {
         if (isset($this->properties[$offset])) {
             return $this->properties[$offset];
         } else {
@@ -199,16 +193,14 @@ class Environment implements \ArrayAccess, \IteratorAggregate
     /**
      * Array Access: Offset Set
      */
-    public function offsetSet($offset, $value)
-    {
+    public function offsetSet($offset, $value) {
         $this->properties[$offset] = $value;
     }
 
     /**
      * Array Access: Offset Unset
      */
-    public function offsetUnset($offset)
-    {
+    public function offsetUnset($offset) {
         unset($this->properties[$offset]);
     }
 
@@ -217,8 +209,7 @@ class Environment implements \ArrayAccess, \IteratorAggregate
      *
      * @return \ArrayIterator
      */
-    public function getIterator()
-    {
+    public function getIterator() {
         return new \ArrayIterator($this->properties);
     }
 }

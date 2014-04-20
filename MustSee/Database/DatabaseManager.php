@@ -8,18 +8,21 @@ use MustSee\Data\Lloc;
 use MustSee\Data\Usuari;
 
 /**
- * Class DataBaseManager
- * Classe per gestionar els objectes de la aplicació MustSee emmagatzemats a la base de dades.
+ * Class DatabaseManager
+ * Aquesta classe es un Singleton que gestiona els objectes de la aplicació MustSee emmagatzemats a
+ * la base de dades.
  *
- * @author Xavier García
+ * @todo    Gestionar els errors
+ * @author  Xavier García
+ * @package MustSee\Database
  */
-class DataBaseManager {
+class DatabaseManager {
+    private static $instance;
 
     private $pdo;
 
     /**
-     * El constructor es privat, s'han d'instanciar cridant a mètode DataBaseManager#getInstance
-     * ().
+     * S'han d'instanciar cridant a mètode DatabaseManager::getInstance().
      *
      * @param \PDO $pdo instància de la classe PDO inicialitzada.
      */
@@ -28,22 +31,32 @@ class DataBaseManager {
     }
 
     /**
-     * Aquest mètode retorna una instància d'aquest gestor correctament inicialitzat.
+     * Aquest mètode retorna una instància d'aquest gestor correctament inicialitzat. El array
+     * de configuració només es fa servir la primera vegada que es genera la instància,
+     * després s'ignora.
      *
-     * @param array $config dades de configuració
-     * @internal param string $dbConfig fitxer de configuració amb les dades per connectar
-     * @return DataBaseManager instància del gestor de dades
+     * @param mixed[] $config array amb les dades de configuració,
+     *                        els valors necessaris son:
+     *                        'db_driver' => ha de ser un valor acceptat per PDOFactory
+     *                        'db_host' => host on es troba la base de dades
+     *                        'db_name' => nom de la base de dades
+     *                        'db_user' => nom d'usuari amb accés
+     *                        'db_pass' => password del usuari
+     * @return DatabaseManager la instància del gestor de dades
      */
     static function getInstance($config) {
-        $pdo = DatabaseFactory::getConnection($config);
+        if (self::$instance === null) {
+            $pdo            = DatabaseFactory::getConnection($config);
+            self::$instance = new DatabaseManager($pdo);
+        }
 
-        return new DataBaseManager($pdo);
+        return self::$instance;
     }
 
     /**
      * Retorna la llista completa de categories de la base de dades.
      *
-     * @return array Categoria amb totes les categories.
+     * @return Categoria[] Array amb totes les categories
      */
     public function getCategories() {
         $statement = $this->pdo->prepare('SELECT id_categoria, descripcio FROM categories');
@@ -62,9 +75,10 @@ class DataBaseManager {
     }
 
     /**
-     * Retorna la llista completa de llocs de la base de dades.
+     * Retorna la llista completa de llocs de la base de dades, incloent les imatges i els
+     * comentaris.
      *
-     * @return array Lloc amb tots els llocs.
+     * @return Lloc[] Array amb tots els llocs
      */
     public function getLlocs() {
         $statement = $this->pdo->prepare('SELECT id_llocs, nom, descripcioExtesa, categories_id_categoria, latitud, longitud FROM llocs');
@@ -81,51 +95,50 @@ class DataBaseManager {
                     $row['longitud'],
                     $row['id_llocs']);
 
-            // Afegim les imatges"
+            // Afegim les imatges i els comentaris
             $lloc->addImatges($this->getImatgesFromLloc($lloc->getId()));
-
-            array_push($llocs, $lloc);
+            $lloc->addComentaris($this->getComentarisFromLloc($lloc->getId()));
+            $llocs[] = $lloc;
         }
 
         return $llocs;
     }
 
     /**
-     * Retorna el lloc demanat com argument.
+     * Retorna el lloc demanat com argument, incloent les imatges i els comentaris.
      *
-     * @param int $id id del lloc que volem obtenir.
-     * @return \MustSee\Data\Lloc lloc construït amb les dades de la base de dades.
+     * @param int $id id del lloc que volem obtenir
+     * @return Lloc el lloc construït amb les dades de la base de dades o null si no es troba
      */
     public function getLloc($id) {
         $statement = $this->pdo->prepare('SELECT nom, descripcioExtesa, categories_id_categoria, latitud, longitud, id_llocs FROM llocs WHERE id_llocs = ?');
         $statement->bindValue(1, $id, \PDO::PARAM_INT);
         $statement->execute();
 
-        if ($row = $statement->fetch()) {
+        if ($result = $statement->fetch()) {
             $lloc = new Lloc(
-                    $row['nom'],
-                    $row['descripcioExtesa'],
-                    $row['categories_id_categoria'],
-                    $row['latitud'],
-                    $row['longitud'],
-                    $row['id_llocs']);
+                    $result['nom'],
+                    $result['descripcioExtesa'],
+                    $result['categories_id_categoria'],
+                    $result['latitud'],
+                    $result['longitud'],
+                    $result['id_llocs']);
 
-            // Afegim les imatges"
+            // Afegim les imatges i comentaris
             $lloc->addImatges($this->getImatgesFromLloc($id));
+            $lloc->addComentaris($this->getComentarisFromLloc($lloc->getId()));
 
             return $lloc;
         } else {
             return null;
         }
-
-
     }
 
     /**
      * Retorna la llista de totes les imatges que pertanyen al lloc passat com argument.
      *
-     * @param integer $id lloc del que volem obtenir les imatges.
-     * @return array Imatge amb les imatges.
+     * @param int $id lloc del que volem obtenir les imatges
+     * @return Imatge[] array amb les totes les imatges del lloc
      */
     public function getImatgesFromLloc($id) {
         $statement = $this->pdo->prepare('SELECT id_foto, url, descripcio, llocs_id_llocs FROM fotos WHERE llocs_id_llocs = ?');
@@ -135,13 +148,12 @@ class DataBaseManager {
 
         $imatges = array();
         foreach ($result as $row) {
-
-            array_push($imatges, new Imatge(
+            $imatges[] = new Imatge(
                     $row['descripcio'],
                     $row['url'],
                     $row['llocs_id_llocs'],
                     $row['id_foto']
-            ));
+            );
         }
 
         return $imatges;
@@ -150,30 +162,31 @@ class DataBaseManager {
     /**
      * Retorna la imatge corresponen a la id passada com argument.
      *
-     * @param integer $id imatge a recuperar.
-     * @return Imatge la imatge corresponen.
+     * @param int $id imatge a recuperar
+     * @return Imatge la imatge corresponen o null si no hi ha cap
      */
     public function getImatge($id) {
         $statement = $this->pdo->prepare('SELECT id_foto, url, descripcio, llocs_id_llocs FROM fotos WHERE id_foto = ?');
         $statement->bindValue(1, $id, \PDO::PARAM_INT);
         $statement->execute();
-        $row = $statement->fetch();
 
-        $imatge = new Imatge(
-                $row['descripcio'],
-                $row['url'],
-                $row['llocs_id_llocs'],
-                $row['id_foto']
-        );
-
-        return $imatge;
+        if ($result = $statement->fetch()) {
+            return new Imatge(
+                    $result['descripcio'],
+                    $result['url'],
+                    $result['llocs_id_llocs'],
+                    $result['id_foto']
+            );
+        } else {
+            return null;
+        }
     }
 
     /**
      * Retorna tots els comentaris enllaçats al lloc passat com argument.
      *
-     * @param  integer $id lloc del que volem obtenir els comentaris.
-     * @return array Comentari amb els comentaris del lloc.
+     * @param  int $id lloc del que volem obtenir els comentaris
+     * @return Comentari[] array amb tots els comentaris del lloc
      */
     public function getComentarisFromLloc($id) {
         $statement = $this->pdo->prepare('SELECT id_comentaris, text, perfil_users_id_usuari, llocs_id_llocs FROM comentaris WHERE llocs_id_llocs = ?');
@@ -183,12 +196,12 @@ class DataBaseManager {
 
         $comentaris = array();
         foreach ($result as $row) {
-            array_push($comentaris, new Comentari(
+            $comentaris[] = new Comentari(
                     $row['text'],
                     $row['perfil_users_id_usuari'],
                     $row['llocs_id_llocs'],
                     $row['id_comentaris']
-            ));
+            );
         }
 
         return $comentaris;
@@ -197,8 +210,8 @@ class DataBaseManager {
     /**
      * Retorna tots els comentaris del usuari passat com argument.
      *
-     * @param integer $id id del usuari del que volem obtenir els comentaris.
-     * @return array Comentari amb els comentaris del lloc.
+     * @param int $id id del usuari del que volem obtenir els comentaris
+     * @return array Comentari amb els comentaris del lloc
      */
     public function getComentarisFromUsuari($id) {
         $statement = $this->pdo->prepare('SELECT id_comentaris, text, llocs_id_llocs, perfil_users_id_usuari FROM comentaris WHERE perfil_users_id_usuari = ?');
@@ -208,22 +221,22 @@ class DataBaseManager {
 
         $comentaris = array();
         foreach ($result as $row) {
-            array_push($comentaris, new Comentari(
+            $comentaris[] = new Comentari(
                     $row['text'],
                     $row['perfil_users_id_usuari'],
                     $row['llocs_id_llocs'],
                     $row['id_comentaris']
-            ));
+            );
         }
 
         return $comentaris;
     }
 
     /**
-     * Recupera les dades del usuari passat com argument.
+     * Recupera les dades del usuari amb la id passada com argument.
      *
-     * @param integer $id id del usuari.
-     * @return Usuari dades del usuari.
+     * @param int $id id del usuari
+     * @return Usuari dades del usuari
      */
     public function getUsuariById($id) {
         $statement = $this->pdo->prepare('SELECT correu, nom, cognom, id_usuari FROM users INNER JOIN perfil ON (users_id_usuari = id_usuari) WHERE id_usuari = ?');
@@ -246,8 +259,8 @@ class DataBaseManager {
     /**
      * Recupera les dades del usuari corresponent al correu passat com argument.
      *
-     * @param $correu correu del usuari
-     * @return Usuari dades del usuari.
+     * @param string $correu correu del usuari
+     * @return Usuari dades del usuari
      */
     public function getUsuariByCorreu($correu) {
         $statement = $this->pdo->prepare('SELECT correu, nom, cognom, id_usuari FROM users INNER JOIN perfil ON (users_id_usuari = id_usuari) WHERE correu = ?');
@@ -265,7 +278,6 @@ class DataBaseManager {
         } else {
             return null;
         }
-
     }
 
     /**
@@ -273,7 +285,7 @@ class DataBaseManager {
      *
      * @param string $correu   correu per comprovar
      * @param string $password contrasenya per comprovar
-     * @return bool cert si s'ha trobar o fals en cas contrari
+     * @return bool true si s'ha trobar o fals en cas contrari
      */
     public function comprovarContrasenya($correu, $password) {
         // Convertim el password en hash
@@ -291,9 +303,17 @@ class DataBaseManager {
         }
     }
 
+    /**
+     * Afegeix un comentari a la base de dades lligat al lloc i el usuari passats com argument.
+     *
+     * @param int    $idLloc    id del lloc
+     * @param string $correu    correu del usuari
+     * @param string $comentari text del comentari
+     * @throws \Exception si el Lloc no existeix o no hi ha un error al inserir el comentari
+     */
     public function addComentariToLloc($idLloc, $correu, $comentari) {
         // Comprovem si existeix el lloc
-        if ($this->getLloc($idLloc)===null) {
+        if ($this->getLloc($idLloc) === null) {
             throw new \Exception('El lloc no existeix');
         }
 
@@ -310,7 +330,7 @@ class DataBaseManager {
         $statement->bindValue(3, $idLloc, \PDO::PARAM_INT);
         $statement->bindValue(4, $idUsuari, \PDO::PARAM_INT);
 
-        if ($statement->execute()===false) {
+        if ($statement->execute() === false) {
             throw new \Exception('Error al inserir el comentari');
         }
     }

@@ -2,15 +2,26 @@
 namespace Serializer;
 
 /**
- * Class XMLSerializer
+ * Class SerializerXML
  * Classe que permet convertir objectes, primitives i arrays en cadenes de text en format XML. En
  * tots els casos en que es necessita fer servir un nom de node, si no s'ha passat cap es farà
  * servir el valor per defecte de SerializerFactory.
  *
- * @author Xavier García
+ * La obtenció de les dades es fa de manera recursiva, així que recupera tots els objectes o arrays
+ * encara que estiguin niuats.
+ *
+ * @author  Xavier García
+ * @package Serializer
  */
 class SerializerXML implements Serializer {
 
+    /**
+     * Aquest mètode retorna les dades passades com arguments convertides en XML.
+     *
+     * @param mixed|mixed[] $data dades per transformar en format XML
+     * @param string        $node nom del node per defecte per si es necessary
+     * @return string dades en format XML
+     */
     public function getSerialized($data, $node = SerializerFactory::DEFAULT_NODE) {
         // Comprovem quin tipus de valor s'ha rebut
         if (is_array($data)) {
@@ -29,12 +40,11 @@ class SerializerXML implements Serializer {
     /**
      * Extreu les dades del array i les retorna com XML
      *
-     * @param array  $array array del que extraiem les dades
-     * @param string $group nom que rebrà el grup
+     * @param mixed[] $array array del que extraiem les dades
+     * @param string  $group nom que rebrà el grup
      * @return string dades en format XML
      */
-    private
-    function getXMLFromArray(array $array, $group) {
+    private function getXMLFromArray(array $array, $group) {
         // Sanegem el nom del grup
         $this->sanitizeNode($group);
 
@@ -85,18 +95,18 @@ class SerializerXML implements Serializer {
     /**
      * Retorna el nom de la classe sense el namespace
      *
-     * @param mixed $object objecte del que volem obtenir el nom
+     * @param object $object objecte del que volem obtenir el nom
      * @return string nom de la classe
      */
-    function getClassName($object) {
+    private function getClassName($object) {
         $className = strtolower(get_class($object));
-        if (strpos ($className, '\\')===false) {
+        if (strpos($className, '\\') === false) {
             return $className;
+        } else {
+            $pos = strrpos($className, '\\');
+
+            return substr($className, $pos + 1);
         }
-
-        if ($pos = strrpos($className, '\\')) return substr($className, $pos + 1);
-
-        return $pos;
     }
 
     /**
@@ -138,12 +148,16 @@ class SerializerXML implements Serializer {
     }
 
     /**
+     * Comprova si el nom del mètode que s'ha passat com argument es un getter de la classe
+     * reflectida.
+     *
      * @param \ReflectionClass $reflect    classe reflectia on es troba el mètode que volem
      *                                     comprovar.
      * @param string           $methodName nom del mètode a comprovar
      * @return bool true si es un getter o false en cas contrari
      */
     private function isGetter(\ReflectionClass $reflect, $methodName) {
+        // Comprovem si comença per get
         $pattern = '/^get.+/';
         if (preg_match($pattern, $methodName)) {
             // Comprovem si hi ha una propietat amb aquest nom

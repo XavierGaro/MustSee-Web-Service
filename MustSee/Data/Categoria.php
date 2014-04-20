@@ -1,27 +1,33 @@
 <?php
 namespace MustSee\Data;
 
-class Categoria
-{
-    private $id = -1;
+/**
+ * Class Categoria
+ * Classe de dades immutable que emmagatzema una categoria.
+ *
+ * @author  Xavier García
+ * @package MustSee\Data
+ */
+class Categoria {
+    private $id;
     private $descripcio;
 
-    function __construct()
-    {
-        $this->descripcio = func_get_arg(0);
-
-        if (func_num_args()===2) {
-            $this->id = func_get_arg(1);
-        }
+    /**
+     * Crea una categoria la id es opcional per crear objectes a la memòria.
+     *
+     * @param string $descripcio nom de la categoria
+     * @param int    $id         identificador de la categoria
+     */
+    public function __construct($descripcio, $id = -1) {
+        $this->descripcio = $descripcio;
+        $this->id         = $id;
     }
 
-    function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
-    function getDescripcio()
-    {
+    public function getDescripcio() {
         return $this->descripcio;
     }
 }

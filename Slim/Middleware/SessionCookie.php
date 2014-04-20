@@ -51,11 +51,10 @@ namespace Slim\Middleware;
  * more than this amount, serialization will fail.
  *
  * @package     Slim
- * @author     Josh Lockhart
- * @since      1.6.0
+ * @author      Josh Lockhart
+ * @since       1.6.0
  */
-class SessionCookie extends \Slim\Middleware
-{
+class SessionCookie extends \Slim\Middleware {
     /**
      * @var array
      */
@@ -66,15 +65,14 @@ class SessionCookie extends \Slim\Middleware
      *
      * @param array $settings
      */
-    public function __construct($settings = array())
-    {
-        $defaults = array(
-            'expires' => '20 minutes',
-            'path' => '/',
-            'domain' => null,
-            'secure' => false,
-            'httponly' => false,
-            'name' => 'slim_session',
+    public function __construct($settings = array()) {
+        $defaults       = array(
+                'expires'  => '20 minutes',
+                'path'     => '/',
+                'domain'   => null,
+                'secure'   => false,
+                'httponly' => false,
+                'name'     => 'slim_session',
         );
         $this->settings = array_merge($defaults, $settings);
         if (is_string($this->settings['expires'])) {
@@ -92,20 +90,19 @@ class SessionCookie extends \Slim\Middleware
         ini_set('session.use_cookies', 0);
         session_cache_limiter(false);
         session_set_save_handler(
-            array($this, 'open'),
-            array($this, 'close'),
-            array($this, 'read'),
-            array($this, 'write'),
-            array($this, 'destroy'),
-            array($this, 'gc')
+                array($this, 'open'),
+                array($this, 'close'),
+                array($this, 'read'),
+                array($this, 'write'),
+                array($this, 'destroy'),
+                array($this, 'gc')
         );
     }
 
     /**
      * Call
      */
-    public function call()
-    {
+    public function call() {
         $this->loadSession();
         $this->next->call();
         $this->saveSession();
@@ -114,8 +111,7 @@ class SessionCookie extends \Slim\Middleware
     /**
      * Load session
      */
-    protected function loadSession()
-    {
+    protected function loadSession() {
         if (session_id() === '') {
             session_start();
         }
@@ -136,75 +132,68 @@ class SessionCookie extends \Slim\Middleware
     /**
      * Save session
      */
-    protected function saveSession()
-    {
+    protected function saveSession() {
         $value = serialize($_SESSION);
 
         if (strlen($value) > 4096) {
             $this->app->getLog()->error('WARNING! Slim\Middleware\SessionCookie Data size is larger than 4KB. Content save failed.');
         } else {
             $this->app->setCookie(
-                $this->settings['name'],
-                $value,
-                $this->settings['expires'],
-                $this->settings['path'],
-                $this->settings['domain'],
-                $this->settings['secure'],
-                $this->settings['httponly']
+                    $this->settings['name'],
+                    $value,
+                    $this->settings['expires'],
+                    $this->settings['path'],
+                    $this->settings['domain'],
+                    $this->settings['secure'],
+                    $this->settings['httponly']
             );
         }
         // session_destroy();
     }
 
     /********************************************************************************
-    * Session Handler
-    *******************************************************************************/
+     * Session Handler
+     *******************************************************************************/
 
     /**
      * @codeCoverageIgnore
      */
-    public function open($savePath, $sessionName)
-    {
+    public function open($savePath, $sessionName) {
         return true;
     }
 
     /**
      * @codeCoverageIgnore
      */
-    public function close()
-    {
+    public function close() {
         return true;
     }
 
     /**
      * @codeCoverageIgnore
      */
-    public function read($id)
-    {
+    public function read($id) {
         return '';
     }
 
     /**
      * @codeCoverageIgnore
      */
-    public function write($id, $data)
-    {
+    public function write($id, $data) {
         return true;
     }
 
     /**
      * @codeCoverageIgnore
      */
-    public function destroy($id)
-    {
+    public function destroy($id) {
         return true;
     }
 
     /**
      * @codeCoverageIgnore
      */
-    public function gc($maxlifetime)
-    {
+    public function gc($maxlifetime) {
         return true;
     }
 }

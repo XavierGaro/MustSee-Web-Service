@@ -32,21 +32,20 @@
  */
 namespace Slim\Middleware;
 
- /**
-  * Flash
-  *
-  * This is middleware for a Slim application that enables
-  * Flash messaging between HTTP requests. This allows you
-  * set Flash messages for the current request, for the next request,
-  * or to retain messages from the previous request through to
-  * the next request.
-  *
-  * @package    Slim
-  * @author     Josh Lockhart
-  * @since      1.6.0
-  */
-class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate, \Countable
-{
+/**
+ * Flash
+ *
+ * This is middleware for a Slim application that enables
+ * Flash messaging between HTTP requests. This allows you
+ * set Flash messages for the current request, for the next request,
+ * or to retain messages from the previous request through to
+ * the next request.
+ *
+ * @package    Slim
+ * @author     Josh Lockhart
+ * @since      1.6.0
+ */
+class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate, \Countable {
     /**
      * @var array
      */
@@ -59,28 +58,27 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
 
     /**
      * Constructor
-     * @param  array  $settings
+     *
+     * @param  array $settings
      */
-    public function __construct($settings = array())
-    {
+    public function __construct($settings = array()) {
         $this->settings = array_merge(array('key' => 'slim.flash'), $settings);
         $this->messages = array(
-            'prev' => array(), //flash messages from prev request (loaded when middleware called)
-            'next' => array(), //flash messages for next request
-            'now' => array() //flash messages for current request
+                'prev' => array(), //flash messages from prev request (loaded when middleware called)
+                'next' => array(), //flash messages for next request
+                'now'  => array() //flash messages for current request
         );
     }
 
     /**
      * Call
      */
-    public function call()
-    {
+    public function call() {
         //Read flash messaging from previous request if available
         $this->loadMessages();
 
         //Prepare flash messaging for current request
-        $env = $this->app->environment();
+        $env               = $this->app->environment();
         $env['slim.flash'] = $this;
         $this->next->call();
         $this->save();
@@ -94,9 +92,8 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
      * @param  string $key
      * @param  string $value
      */
-    public function now($key, $value)
-    {
-        $this->messages['now'][(string) $key] = $value;
+    public function now($key, $value) {
+        $this->messages['now'][(string)$key] = $value;
     }
 
     /**
@@ -107,9 +104,8 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
      * @param  string $key
      * @param  string $value
      */
-    public function set($key, $value)
-    {
-        $this->messages['next'][(string) $key] = $value;
+    public function set($key, $value) {
+        $this->messages['next'][(string)$key] = $value;
     }
 
     /**
@@ -117,8 +113,7 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
      *
      * Retain flash messages from the previous request for the next request
      */
-    public function keep()
-    {
+    public function keep() {
         foreach ($this->messages['prev'] as $key => $val) {
             $this->messages['next'][$key] = $val;
         }
@@ -127,16 +122,14 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
     /**
      * Save
      */
-    public function save()
-    {
+    public function save() {
         $_SESSION[$this->settings['key']] = $this->messages['next'];
     }
 
     /**
      * Load messages from previous request if available
      */
-    public function loadMessages()
-    {
+    public function loadMessages() {
         if (isset($_SESSION[$this->settings['key']])) {
             $this->messages['prev'] = $_SESSION[$this->settings['key']];
         }
@@ -147,16 +140,14 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
      *
      * @return array
      */
-    public function getMessages()
-    {
+    public function getMessages() {
         return array_merge($this->messages['prev'], $this->messages['now']);
     }
 
     /**
      * Array Access: Offset Exists
      */
-    public function offsetExists($offset)
-    {
+    public function offsetExists($offset) {
         $messages = $this->getMessages();
 
         return isset($messages[$offset]);
@@ -165,8 +156,7 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
     /**
      * Array Access: Offset Get
      */
-    public function offsetGet($offset)
-    {
+    public function offsetGet($offset) {
         $messages = $this->getMessages();
 
         return isset($messages[$offset]) ? $messages[$offset] : null;
@@ -175,25 +165,23 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
     /**
      * Array Access: Offset Set
      */
-    public function offsetSet($offset, $value)
-    {
+    public function offsetSet($offset, $value) {
         $this->now($offset, $value);
     }
 
     /**
      * Array Access: Offset Unset
      */
-    public function offsetUnset($offset)
-    {
+    public function offsetUnset($offset) {
         unset($this->messages['prev'][$offset], $this->messages['now'][$offset]);
     }
 
     /**
      * Iterator Aggregate: Get Iterator
+     *
      * @return \ArrayIterator
      */
-    public function getIterator()
-    {
+    public function getIterator() {
         $messages = $this->getMessages();
 
         return new \ArrayIterator($messages);
@@ -202,11 +190,9 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
     /**
      * Countable: Count
      */
-    public function count()
-    {
+    public function count() {
         return count($this->getMessages());
     }
-
 
 
 }

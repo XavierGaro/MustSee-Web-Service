@@ -40,6 +40,7 @@ if (!extension_loaded('mcrypt')) {
 
 /**
  * Slim
+ *
  * @package  Slim
  * @author   Josh Lockhart
  * @since    1.0.0
@@ -49,8 +50,7 @@ if (!extension_loaded('mcrypt')) {
  * @property \Slim\Http\Request  $request
  * @property \Slim\Router        $router
  */
-class Slim
-{
+class Slim {
     /**
      * @const string
      */
@@ -90,26 +90,25 @@ class Slim
      * @var array
      */
     protected $hooks = array(
-        'slim.before' => array(array()),
-        'slim.before.router' => array(array()),
-        'slim.before.dispatch' => array(array()),
-        'slim.after.dispatch' => array(array()),
-        'slim.after.router' => array(array()),
-        'slim.after' => array(array())
+            'slim.before'          => array(array()),
+            'slim.before.router'   => array(array()),
+            'slim.before.dispatch' => array(array()),
+            'slim.after.dispatch'  => array(array()),
+            'slim.after.router'    => array(array()),
+            'slim.after'           => array(array())
     );
 
     /********************************************************************************
-    * PSR-0 Autoloader
-    *
-    * Do not use if you are using Composer to autoload dependencies.
-    *******************************************************************************/
+     * PSR-0 Autoloader
+     *
+     * Do not use if you are using Composer to autoload dependencies.
+     *******************************************************************************/
 
     /**
      * Slim PSR-0 autoloader
      */
-    public static function autoload($className)
-    {
-        $thisClass = str_replace(__NAMESPACE__.'\\', '', __CLASS__);
+    public static function autoload($className) {
+        $thisClass = str_replace(__NAMESPACE__ . '\\', '', __CLASS__);
 
         $baseDir = __DIR__;
 
@@ -123,7 +122,7 @@ class Slim
         if ($lastNsPos = strripos($className, '\\')) {
             $namespace = substr($className, 0, $lastNsPos);
             $className = substr($className, $lastNsPos + 1);
-            $fileName  .= str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+            $fileName .= str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
         }
         $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
 
@@ -135,23 +134,22 @@ class Slim
     /**
      * Register Slim's PSR-0 autoloader
      */
-    public static function registerAutoloader()
-    {
+    public static function registerAutoloader() {
         spl_autoload_register(__NAMESPACE__ . "\\Slim::autoload");
     }
 
     /********************************************************************************
-    * Instantiation and Configuration
-    *******************************************************************************/
+     * Instantiation and Configuration
+     *******************************************************************************/
 
     /**
      * Constructor
+     *
      * @param  array $userSettings Associative array of application settings
      */
-    public function __construct(array $userSettings = array())
-    {
+    public function __construct(array $userSettings = array()) {
         // Setup IoC container
-        $this->container = new \Slim\Helper\Set();
+        $this->container             = new \Slim\Helper\Set();
         $this->container['settings'] = array_merge(static::getDefaultSettings(), $userSettings);
 
         // Default environment
@@ -176,11 +174,12 @@ class Slim
 
         // Default view
         $this->container->singleton('view', function ($c) {
-            $viewClass = $c['settings']['view'];
+            $viewClass     = $c['settings']['view'];
             $templatesPath = $c['settings']['templates.path'];
 
             $view = ($viewClass instanceOf \Slim\View) ? $viewClass : new $viewClass;
             $view->setTemplatesDirectory($templatesPath);
+
             return $view;
         });
 
@@ -196,7 +195,7 @@ class Slim
             $log = new \Slim\Log($c['logWriter']);
             $log->setEnabled($c['settings']['log.enabled']);
             $log->setLevel($c['settings']['log.level']);
-            $env = $c['environment'];
+            $env             = $c['environment'];
             $env['slim.log'] = $log;
 
             return $log;
@@ -229,88 +228,84 @@ class Slim
         }
     }
 
-    public function __get($name)
-    {
+    public function __get($name) {
         return $this->container[$name];
     }
 
-    public function __set($name, $value)
-    {
+    public function __set($name, $value) {
         $this->container[$name] = $value;
     }
 
-    public function __isset($name)
-    {
+    public function __isset($name) {
         return isset($this->container[$name]);
     }
 
-    public function __unset($name)
-    {
+    public function __unset($name) {
         unset($this->container[$name]);
     }
 
     /**
      * Get application instance by name
-     * @param  string    $name The name of the Slim application
+     *
+     * @param  string $name The name of the Slim application
      * @return \Slim\Slim|null
      */
-    public static function getInstance($name = 'default')
-    {
+    public static function getInstance($name = 'default') {
         return isset(static::$apps[$name]) ? static::$apps[$name] : null;
     }
 
     /**
      * Set Slim application name
+     *
      * @param  string $name The name of this Slim application
      */
-    public function setName($name)
-    {
-        $this->name = $name;
+    public function setName($name) {
+        $this->name          = $name;
         static::$apps[$name] = $this;
     }
 
     /**
      * Get Slim application name
+     *
      * @return string|null
      */
-    public function getName()
-    {
+    public function getName() {
         return $this->name;
     }
 
     /**
      * Get default application settings
+     *
      * @return array
      */
-    public static function getDefaultSettings()
-    {
+    public static function getDefaultSettings() {
         return array(
             // Application
-            'mode' => 'development',
+                'mode'                  => 'development',
             // Debugging
-            'debug' => true,
+                'debug'                 => true,
             // Logging
-            'log.writer' => null,
-            'log.level' => \Slim\Log::DEBUG,
-            'log.enabled' => true,
+                'log.writer'            => null,
+                'log.level'             => \Slim\Log::DEBUG,
+                'log.enabled'           => true,
             // View
-            'templates.path' => './templates',
-            'view' => '\Slim\View',
+                'templates.path'        => './templates',
+                'view'                  => '\Slim\View',
             // Cookies
-            'cookies.encrypt' => false,
-            'cookies.lifetime' => '20 minutes',
-            'cookies.path' => '/',
-            'cookies.domain' => null,
-            'cookies.secure' => false,
-            'cookies.httponly' => false,
+                'cookies.encrypt'       => false,
+                'cookies.lifetime'      => '20 minutes',
+                'cookies.path'          => '/',
+                'cookies.domain'        => null,
+                'cookies.secure'        => false,
+                'cookies.httponly'      => false,
             // Encryption
-            'cookies.secret_key' => 'CHANGE_ME',
-            'cookies.cipher' => MCRYPT_RIJNDAEL_256,
-            'cookies.cipher_mode' => MCRYPT_MODE_CBC,
+                'cookies.secret_key'    => 'CHANGE_ME',
+                'cookies.cipher'        => MCRYPT_RIJNDAEL_256,
+                'cookies.cipher_mode'   => MCRYPT_MODE_CBC,
             // HTTP
-            'http.version' => '1.1',
+                'http.version'          => '1.1',
             // Routing
-            'routes.case_sensitive' => true
+                'routes.case_sensitive' => true
         );
     }
 
@@ -333,8 +328,7 @@ class Slim
      * @param  mixed        $value If name is a string, the value of the setting identified by $name
      * @return mixed        The value of a setting if only one argument is a string
      */
-    public function config($name, $value = null)
-    {
+    public function config($name, $value = null) {
         $c = $this->container;
 
         if (is_array($name)) {
@@ -346,15 +340,15 @@ class Slim
         } elseif (func_num_args() === 1) {
             return isset($c['settings'][$name]) ? $c['settings'][$name] : null;
         } else {
-            $settings = $c['settings'];
+            $settings        = $c['settings'];
             $settings[$name] = $value;
-            $c['settings'] = $settings;
+            $c['settings']   = $settings;
         }
     }
 
     /********************************************************************************
-    * Application Modes
-    *******************************************************************************/
+     * Application Modes
+     *******************************************************************************/
 
     /**
      * Get application mode
@@ -365,8 +359,7 @@ class Slim
      *
      * @return string
      */
-    public function getMode()
-    {
+    public function getMode() {
         return $this->mode;
     }
 
@@ -382,29 +375,28 @@ class Slim
      * @param  mixed  $callable
      * @return void
      */
-    public function configureMode($mode, $callable)
-    {
+    public function configureMode($mode, $callable) {
         if ($mode === $this->getMode() && is_callable($callable)) {
             call_user_func($callable);
         }
     }
 
     /********************************************************************************
-    * Logging
-    *******************************************************************************/
+     * Logging
+     *******************************************************************************/
 
     /**
      * Get application log
+     *
      * @return \Slim\Log
      */
-    public function getLog()
-    {
+    public function getLog() {
         return $this->log;
     }
 
     /********************************************************************************
-    * Routing
-    *******************************************************************************/
+     * Routing
+     *******************************************************************************/
 
     /**
      * Add GET|POST|PUT|PATCH|DELETE route
@@ -436,11 +428,10 @@ class Slim
      * @param   array (See notes above)
      * @return  \Slim\Route
      */
-    protected function mapRoute($args)
-    {
-        $pattern = array_shift($args);
+    protected function mapRoute($args) {
+        $pattern  = array_shift($args);
         $callable = array_pop($args);
-        $route = new \Slim\Route($pattern, $callable, $this->settings['routes.case_sensitive']);
+        $route    = new \Slim\Route($pattern, $callable, $this->settings['routes.case_sensitive']);
         $this->router->map($route);
         if (count($args) > 0) {
             $route->setMiddleware($args);
@@ -451,11 +442,11 @@ class Slim
 
     /**
      * Add generic route without associated HTTP method
+     *
      * @see    mapRoute()
      * @return \Slim\Route
      */
-    public function map()
-    {
+    public function map() {
         $args = func_get_args();
 
         return $this->mapRoute($args);
@@ -463,11 +454,11 @@ class Slim
 
     /**
      * Add GET route
+     *
      * @see    mapRoute()
      * @return \Slim\Route
      */
-    public function get()
-    {
+    public function get() {
         $args = func_get_args();
 
         return $this->mapRoute($args)->via(\Slim\Http\Request::METHOD_GET, \Slim\Http\Request::METHOD_HEAD);
@@ -475,11 +466,11 @@ class Slim
 
     /**
      * Add POST route
+     *
      * @see    mapRoute()
      * @return \Slim\Route
      */
-    public function post()
-    {
+    public function post() {
         $args = func_get_args();
 
         return $this->mapRoute($args)->via(\Slim\Http\Request::METHOD_POST);
@@ -487,11 +478,11 @@ class Slim
 
     /**
      * Add PUT route
+     *
      * @see    mapRoute()
      * @return \Slim\Route
      */
-    public function put()
-    {
+    public function put() {
         $args = func_get_args();
 
         return $this->mapRoute($args)->via(\Slim\Http\Request::METHOD_PUT);
@@ -499,11 +490,11 @@ class Slim
 
     /**
      * Add PATCH route
+     *
      * @see    mapRoute()
      * @return \Slim\Route
      */
-    public function patch()
-    {
+    public function patch() {
         $args = func_get_args();
 
         return $this->mapRoute($args)->via(\Slim\Http\Request::METHOD_PATCH);
@@ -511,11 +502,11 @@ class Slim
 
     /**
      * Add DELETE route
+     *
      * @see    mapRoute()
      * @return \Slim\Route
      */
-    public function delete()
-    {
+    public function delete() {
         $args = func_get_args();
 
         return $this->mapRoute($args)->via(\Slim\Http\Request::METHOD_DELETE);
@@ -523,11 +514,11 @@ class Slim
 
     /**
      * Add OPTIONS route
+     *
      * @see    mapRoute()
      * @return \Slim\Route
      */
-    public function options()
-    {
+    public function options() {
         $args = func_get_args();
 
         return $this->mapRoute($args)->via(\Slim\Http\Request::METHOD_OPTIONS);
@@ -543,10 +534,9 @@ class Slim
      * Accepts the same parameters as a standard route so:
      * (pattern, middleware1, middleware2, ..., $callback)
      */
-    public function group()
-    {
-        $args = func_get_args();
-        $pattern = array_shift($args);
+    public function group() {
+        $args     = func_get_args();
+        $pattern  = array_shift($args);
         $callable = array_pop($args);
         $this->router->pushGroup($pattern, $args);
         if (is_callable($callable)) {
@@ -560,8 +550,7 @@ class Slim
      * @see    mapRoute()
      * @return \Slim\Route
      */
-    public function any()
-    {
+    public function any() {
         $args = func_get_args();
 
         return $this->mapRoute($args)->via("ANY");
@@ -588,8 +577,7 @@ class Slim
      *
      * @param  mixed $callable Anything that returns true for is_callable()
      */
-    public function notFound ($callable = null)
-    {
+    public function notFound($callable = null) {
         if (is_callable($callable)) {
             $this->notFound = $callable;
         } else {
@@ -626,8 +614,7 @@ class Slim
      *
      * @param  mixed $argument Callable|\Exception
      */
-    public function error($argument = null)
-    {
+    public function error($argument = null) {
         if (is_callable($argument)) {
             //Register error handler
             $this->error = $argument;
@@ -649,8 +636,7 @@ class Slim
      * @param  \Exception|null $argument
      * @return string
      */
-    protected function callErrorHandler($argument = null)
-    {
+    protected function callErrorHandler($argument = null) {
         ob_start();
         if (is_callable($this->error)) {
             call_user_func_array($this->error, array($argument));
@@ -662,42 +648,42 @@ class Slim
     }
 
     /********************************************************************************
-    * Application Accessors
-    *******************************************************************************/
+     * Application Accessors
+     *******************************************************************************/
 
     /**
      * Get a reference to the Environment object
+     *
      * @return \Slim\Environment
      */
-    public function environment()
-    {
+    public function environment() {
         return $this->environment;
     }
 
     /**
      * Get the Request object
+     *
      * @return \Slim\Http\Request
      */
-    public function request()
-    {
+    public function request() {
         return $this->request;
     }
 
     /**
      * Get the Response object
+     *
      * @return \Slim\Http\Response
      */
-    public function response()
-    {
+    public function response() {
         return $this->response;
     }
 
     /**
      * Get the Router object
+     *
      * @return \Slim\Router
      */
-    public function router()
-    {
+    public function router() {
         return $this->router;
     }
 
@@ -716,8 +702,7 @@ class Slim
      * @param  string|\Slim\View $viewClass The name or instance of a \Slim\View subclass
      * @return \Slim\View
      */
-    public function view($viewClass = null)
-    {
+    public function view($viewClass = null) {
         if (!is_null($viewClass)) {
             $existingData = is_null($this->view) ? array() : $this->view->getData();
             if ($viewClass instanceOf \Slim\View) {
@@ -733,8 +718,8 @@ class Slim
     }
 
     /********************************************************************************
-    * Rendering
-    *******************************************************************************/
+     * Rendering
+     *******************************************************************************/
 
     /**
      * Render a template
@@ -748,8 +733,7 @@ class Slim
      * @param  array  $data     Associative array of Data made available to the view
      * @param  int    $status   The HTTP response status code to use (optional)
      */
-    public function render($template, $data = array(), $status = null)
-    {
+    public function render($template, $data = array(), $status = null) {
         if (!is_null($status)) {
             $this->response->status($status);
         }
@@ -758,8 +742,8 @@ class Slim
     }
 
     /********************************************************************************
-    * HTTP Caching
-    *******************************************************************************/
+     * HTTP Caching
+     *******************************************************************************/
 
     /**
      * Set Last-Modified HTTP Response Header
@@ -771,11 +755,10 @@ class Slim
      * matches the specified last modified time, the application will stop
      * and send a '304 Not Modified' response to the client.
      *
-     * @param  int                       $time The last modified UNIX timestamp
+     * @param  int $time The last modified UNIX timestamp
      * @throws \InvalidArgumentException If provided timestamp is not an integer
      */
-    public function lastModified($time)
-    {
+    public function lastModified($time) {
         if (is_integer($time)) {
             $this->response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s T', $time));
             if ($time === strtotime($this->request->headers->get('IF_MODIFIED_SINCE'))) {
@@ -798,12 +781,11 @@ class Slim
      * a matching etag, execution is immediately stopped. If the request
      * method is GET or HEAD, a '304 Not Modified' response is sent.
      *
-     * @param  string                    $value The etag value
-     * @param  string                    $type  The type of etag to create; either "strong" or "weak"
+     * @param  string $value The etag value
+     * @param  string $type  The type of etag to create; either "strong" or "weak"
      * @throws \InvalidArgumentException If provided type is invalid
      */
-    public function etag($value, $type = 'strong')
-    {
+    public function etag($value, $type = 'strong') {
         //Ensure type is correct
         if (!in_array($type, array('strong', 'weak'))) {
             throw new \InvalidArgumentException('Invalid Slim::etag type. Expected "strong" or "weak".');
@@ -812,7 +794,7 @@ class Slim
         //Set etag value
         $value = '"' . $value . '"';
         if ($type === 'weak') {
-            $value = 'W/'.$value;
+            $value = 'W/' . $value;
         }
         $this->response['ETag'] = $value;
 
@@ -835,11 +817,10 @@ class Slim
      * if the resource has not changed. The `Expires` header should be used in
      * conjunction with the `etag()` or `lastModified()` methods above.
      *
-     * @param string|int    $time   If string, a time to be parsed by `strtotime()`;
+     * @param string|int $time      If string, a time to be parsed by `strtotime()`;
      *                              If int, a UNIX timestamp;
      */
-    public function expires($time)
-    {
+    public function expires($time) {
         if (is_string($time)) {
             $time = strtotime($time);
         }
@@ -847,32 +828,31 @@ class Slim
     }
 
     /********************************************************************************
-    * HTTP Cookies
-    *******************************************************************************/
+     * HTTP Cookies
+     *******************************************************************************/
 
     /**
      * Set HTTP cookie to be sent with the HTTP response
      *
-     * @param string     $name      The cookie name
-     * @param string     $value     The cookie value
-     * @param int|string $time      The duration of the cookie;
+     * @param string     $name          The cookie name
+     * @param string     $value         The cookie value
+     * @param int|string $time          The duration of the cookie;
      *                                  If integer, should be UNIX timestamp;
      *                                  If string, converted to UNIX timestamp with `strtotime`;
-     * @param string     $path      The path on the server in which the cookie will be available on
-     * @param string     $domain    The domain that the cookie is available to
-     * @param bool       $secure    Indicates that the cookie should only be transmitted over a secure
-     *                              HTTPS connection to/from the client
-     * @param bool       $httponly  When TRUE the cookie will be made accessible only through the HTTP protocol
+     * @param string     $path          The path on the server in which the cookie will be available on
+     * @param string     $domain        The domain that the cookie is available to
+     * @param bool       $secure        Indicates that the cookie should only be transmitted over a secure
+     *                                  HTTPS connection to/from the client
+     * @param bool       $httponly      When TRUE the cookie will be made accessible only through the HTTP protocol
      */
-    public function setCookie($name, $value, $time = null, $path = null, $domain = null, $secure = null, $httponly = null)
-    {
+    public function setCookie($name, $value, $time = null, $path = null, $domain = null, $secure = null, $httponly = null) {
         $settings = array(
-            'value' => $value,
-            'expires' => is_null($time) ? $this->config('cookies.lifetime') : $time,
-            'path' => is_null($path) ? $this->config('cookies.path') : $path,
-            'domain' => is_null($domain) ? $this->config('cookies.domain') : $domain,
-            'secure' => is_null($secure) ? $this->config('cookies.secure') : $secure,
-            'httponly' => is_null($httponly) ? $this->config('cookies.httponly') : $httponly
+                'value'    => $value,
+                'expires'  => is_null($time) ? $this->config('cookies.lifetime') : $time,
+                'path'     => is_null($path) ? $this->config('cookies.path') : $path,
+                'domain'   => is_null($domain) ? $this->config('cookies.domain') : $domain,
+                'secure'   => is_null($secure) ? $this->config('cookies.secure') : $secure,
+                'httponly' => is_null($httponly) ? $this->config('cookies.httponly') : $httponly
         );
         $this->response->cookies->set($name, $settings);
     }
@@ -884,22 +864,21 @@ class Slim
      * or return NULL if cookie does not exist. Cookies created during
      * the current request will not be available until the next request.
      *
-     * @param  string      $name
-     * @param  bool        $deleteIfInvalid
+     * @param  string $name
+     * @param  bool   $deleteIfInvalid
      * @return string|null
      */
-    public function getCookie($name, $deleteIfInvalid = true)
-    {
+    public function getCookie($name, $deleteIfInvalid = true) {
         // Get cookie value
         $value = $this->request->cookies->get($name);
 
         // Decode if encrypted
         if ($this->config('cookies.encrypt')) {
             $value = \Slim\Http\Util::decodeSecureCookie(
-                $value,
-                $this->config('cookies.secret_key'),
-                $this->config('cookies.cipher'),
-                $this->config('cookies.cipher_mode')
+                    $value,
+                    $this->config('cookies.secret_key'),
+                    $this->config('cookies.cipher'),
+                    $this->config('cookies.cipher_mode')
             );
             if ($value === false && $deleteIfInvalid) {
                 $this->deleteCookie($name);
@@ -914,19 +893,18 @@ class Slim
      *
      * Set encrypted HTTP cookie
      *
-     * @param string    $name       The cookie name
-     * @param mixed     $value      The cookie value
-     * @param mixed     $expires    The duration of the cookie;
+     * @param string $name              The cookie name
+     * @param mixed  $value             The cookie value
+     * @param mixed  $expires           The duration of the cookie;
      *                                  If integer, should be UNIX timestamp;
      *                                  If string, converted to UNIX timestamp with `strtotime`;
-     * @param string    $path       The path on the server in which the cookie will be available on
-     * @param string    $domain     The domain that the cookie is available to
-     * @param bool      $secure     Indicates that the cookie should only be transmitted over a secure
-     *                              HTTPS connection from the client
-     * @param  bool     $httponly   When TRUE the cookie will be made accessible only through the HTTP protocol
+     * @param string $path              The path on the server in which the cookie will be available on
+     * @param string $domain            The domain that the cookie is available to
+     * @param bool   $secure            Indicates that the cookie should only be transmitted over a secure
+     *                                  HTTPS connection from the client
+     * @param  bool  $httponly          When TRUE the cookie will be made accessible only through the HTTP protocol
      */
-    public function setEncryptedCookie($name, $value, $expires = null, $path = null, $domain = null, $secure = false, $httponly = false)
-    {
+    public function setEncryptedCookie($name, $value, $expires = null, $path = null, $domain = null, $secure = false, $httponly = false) {
         $this->setCookie($name, $value, $expires, $path, $domain, $secure, $httponly);
     }
 
@@ -939,12 +917,11 @@ class Slim
      * or return NULL if cookie does not exist. Encrypted cookies created during
      * the current request will not be available until the next request.
      *
-     * @param  string       $name
-     * @param  bool         $deleteIfInvalid
+     * @param  string $name
+     * @param  bool   $deleteIfInvalid
      * @return string|bool
      */
-    public function getEncryptedCookie($name, $deleteIfInvalid = true)
-    {
+    public function getEncryptedCookie($name, $deleteIfInvalid = true) {
         return $this->getCookie($name, $deleteIfInvalid);
     }
 
@@ -957,27 +934,26 @@ class Slim
      * removed. If any of this method's arguments are omitted or set to NULL, the
      * default Cookie setting values (set during Slim::init) will be used instead.
      *
-     * @param string    $name       The cookie name
-     * @param string    $path       The path on the server in which the cookie will be available on
-     * @param string    $domain     The domain that the cookie is available to
-     * @param bool      $secure     Indicates that the cookie should only be transmitted over a secure
+     * @param string $name          The cookie name
+     * @param string $path          The path on the server in which the cookie will be available on
+     * @param string $domain        The domain that the cookie is available to
+     * @param bool   $secure        Indicates that the cookie should only be transmitted over a secure
      *                              HTTPS connection from the client
-     * @param  bool     $httponly   When TRUE the cookie will be made accessible only through the HTTP protocol
+     * @param  bool  $httponly      When TRUE the cookie will be made accessible only through the HTTP protocol
      */
-    public function deleteCookie($name, $path = null, $domain = null, $secure = null, $httponly = null)
-    {
+    public function deleteCookie($name, $path = null, $domain = null, $secure = null, $httponly = null) {
         $settings = array(
-            'domain' => is_null($domain) ? $this->config('cookies.domain') : $domain,
-            'path' => is_null($path) ? $this->config('cookies.path') : $path,
-            'secure' => is_null($secure) ? $this->config('cookies.secure') : $secure,
-            'httponly' => is_null($httponly) ? $this->config('cookies.httponly') : $httponly
+                'domain'   => is_null($domain) ? $this->config('cookies.domain') : $domain,
+                'path'     => is_null($path) ? $this->config('cookies.path') : $path,
+                'secure'   => is_null($secure) ? $this->config('cookies.secure') : $secure,
+                'httponly' => is_null($httponly) ? $this->config('cookies.httponly') : $httponly
         );
         $this->response->cookies->remove($name, $settings);
     }
 
     /********************************************************************************
-    * Helper Methods
-    *******************************************************************************/
+     * Helper Methods
+     *******************************************************************************/
 
     /**
      * Get the absolute path to this Slim application's root directory
@@ -989,16 +965,14 @@ class Slim
      *
      * @return string
      */
-    public function root()
-    {
+    public function root() {
         return rtrim($_SERVER['DOCUMENT_ROOT'], '/') . rtrim($this->request->getRootUri(), '/') . '/';
     }
 
     /**
      * Clean current output buffer
      */
-    protected function cleanBuffer()
-    {
+    protected function cleanBuffer() {
         if (ob_get_level() !== 0) {
             ob_clean();
         }
@@ -1012,8 +986,7 @@ class Slim
      *
      * @throws \Slim\Exception\Stop
      */
-    public function stop()
-    {
+    public function stop() {
         throw new \Slim\Exception\Stop();
     }
 
@@ -1026,11 +999,10 @@ class Slim
      * If you need to render a template AND customize the response status,
      * use the application's `render()` method instead.
      *
-     * @param  int      $status     The HTTP response status
-     * @param  string   $message    The HTTP response body
+     * @param  int    $status  The HTTP response status
+     * @param  string $message The HTTP response body
      */
-    public function halt($status, $message = '')
-    {
+    public function halt($status, $message = '') {
         $this->cleanBuffer();
         $this->response->status($status);
         $this->response->body($message);
@@ -1046,39 +1018,38 @@ class Slim
      *
      * @throws \Slim\Exception\Pass
      */
-    public function pass()
-    {
+    public function pass() {
         $this->cleanBuffer();
         throw new \Slim\Exception\Pass();
     }
 
     /**
      * Set the HTTP response Content-Type
-     * @param  string   $type   The Content-Type for the Response (ie. text/html)
+     *
+     * @param  string $type The Content-Type for the Response (ie. text/html)
      */
-    public function contentType($type)
-    {
+    public function contentType($type) {
         $this->response->headers->set('Content-Type', $type);
     }
 
     /**
      * Set the HTTP response status code
-     * @param  int      $code     The HTTP response status code
+     *
+     * @param  int $code The HTTP response status code
      */
-    public function status($code)
-    {
+    public function status($code) {
         $this->response->setStatus($code);
     }
 
     /**
      * Get the URL for a named route
-     * @param  string               $name       The route name
-     * @param  array                $params     Associative array of URL parameters and replacement values
+     *
+     * @param  string $name   The route name
+     * @param  array  $params Associative array of URL parameters and replacement values
      * @throws \RuntimeException    If named route does not exist
      * @return string
      */
-    public function urlFor($name, $params = array())
-    {
+    public function urlFor($name, $params = array()) {
         return $this->request->getRootUri() . $this->router->urlFor($name, $params);
     }
 
@@ -1091,26 +1062,25 @@ class Slim
      * 3xx status code if you want. This method will automatically set the
      * HTTP Location header for you using the URL parameter.
      *
-     * @param  string   $url        The destination URL
-     * @param  int      $status     The HTTP redirect status code (optional)
+     * @param  string $url    The destination URL
+     * @param  int    $status The HTTP redirect status code (optional)
      */
-    public function redirect($url, $status = 302)
-    {
+    public function redirect($url, $status = 302) {
         $this->response->redirect($url, $status);
         $this->halt($status);
     }
 
     /********************************************************************************
-    * Flash Messages
-    *******************************************************************************/
+     * Flash Messages
+     *******************************************************************************/
 
     /**
      * Set flash message for subsequent request
-     * @param  string   $key
-     * @param  mixed    $value
+     *
+     * @param  string $key
+     * @param  mixed  $value
      */
-    public function flash($key, $value)
-    {
+    public function flash($key, $value) {
         if (isset($this->environment['slim.flash'])) {
             $this->environment['slim.flash']->set($key, $value);
         }
@@ -1118,11 +1088,11 @@ class Slim
 
     /**
      * Set flash message for current request
-     * @param  string   $key
-     * @param  mixed    $value
+     *
+     * @param  string $key
+     * @param  mixed  $value
      */
-    public function flashNow($key, $value)
-    {
+    public function flashNow($key, $value) {
         if (isset($this->environment['slim.flash'])) {
             $this->environment['slim.flash']->now($key, $value);
         }
@@ -1131,40 +1101,39 @@ class Slim
     /**
      * Keep flash messages from previous request for subsequent request
      */
-    public function flashKeep()
-    {
+    public function flashKeep() {
         if (isset($this->environment['slim.flash'])) {
             $this->environment['slim.flash']->keep();
         }
     }
 
     /********************************************************************************
-    * Hooks
-    *******************************************************************************/
+     * Hooks
+     *******************************************************************************/
 
     /**
      * Assign hook
-     * @param  string   $name       The hook name
-     * @param  mixed    $callable   A callable object
-     * @param  int      $priority   The hook priority; 0 = high, 10 = low
+     *
+     * @param  string $name     The hook name
+     * @param  mixed  $callable A callable object
+     * @param  int    $priority The hook priority; 0 = high, 10 = low
      */
-    public function hook($name, $callable, $priority = 10)
-    {
+    public function hook($name, $callable, $priority = 10) {
         if (!isset($this->hooks[$name])) {
             $this->hooks[$name] = array(array());
         }
         if (is_callable($callable)) {
-            $this->hooks[$name][(int) $priority][] = $callable;
+            $this->hooks[$name][(int)$priority][] = $callable;
         }
     }
 
     /**
      * Invoke hook
-     * @param  string   $name       The hook name
-     * @param  mixed    $hookArg    (Optional) Argument for hooked functions
+     *
+     * @param  string $name    The hook name
+     * @param  mixed  $hookArg (Optional) Argument for hooked functions
      */
-    public function applyHook($name, $hookArg = null)
-    {
+    public function applyHook($name, $hookArg = null) {
         if (!isset($this->hooks[$name])) {
             $this->hooks[$name] = array(array());
         }
@@ -1191,13 +1160,12 @@ class Slim
      * Else, all listeners are returned as an associative array whose
      * keys are hook names and whose values are arrays of listeners.
      *
-     * @param  string     $name     A hook name (Optional)
+     * @param  string $name A hook name (Optional)
      * @return array|null
      */
-    public function getHooks($name = null)
-    {
+    public function getHooks($name = null) {
         if (!is_null($name)) {
-            return isset($this->hooks[(string) $name]) ? $this->hooks[(string) $name] : null;
+            return isset($this->hooks[(string)$name]) ? $this->hooks[(string)$name] : null;
         } else {
             return $this->hooks;
         }
@@ -1210,12 +1178,11 @@ class Slim
      * a valid hook name, only the listeners attached
      * to that hook will be cleared.
      *
-     * @param  string   $name   A hook name (Optional)
+     * @param  string $name A hook name (Optional)
      */
-    public function clearHooks($name = null)
-    {
-        if (!is_null($name) && isset($this->hooks[(string) $name])) {
-            $this->hooks[(string) $name] = array(array());
+    public function clearHooks($name = null) {
+        if (!is_null($name) && isset($this->hooks[(string)$name])) {
+            $this->hooks[(string)$name] = array(array());
         } else {
             foreach ($this->hooks as $key => $value) {
                 $this->hooks[$key] = array(array());
@@ -1224,8 +1191,8 @@ class Slim
     }
 
     /********************************************************************************
-    * Middleware
-    *******************************************************************************/
+     * Middleware
+     *******************************************************************************/
 
     /**
      * Add middleware
@@ -1235,9 +1202,8 @@ class Slim
      *
      * @param \Slim\Middleware
      */
-    public function add(\Slim\Middleware $newMiddleware)
-    {
-        if(in_array($newMiddleware, $this->middleware)) {
+    public function add(\Slim\Middleware $newMiddleware) {
+        if (in_array($newMiddleware, $this->middleware)) {
             $middleware_class = get_class($newMiddleware);
             throw new \RuntimeException("Circular Middleware setup detected. Tried to queue the same Middleware instance ({$middleware_class}) twice.");
         }
@@ -1247,8 +1213,8 @@ class Slim
     }
 
     /********************************************************************************
-    * Runner
-    *******************************************************************************/
+     * Runner
+     *******************************************************************************/
 
     /**
      * Run
@@ -1257,8 +1223,7 @@ class Slim
      * the result is an array of HTTP status, header, and body. These three items
      * are returned to the HTTP client.
      */
-    public function run()
-    {
+    public function run() {
         set_error_handler(array('\Slim\Slim', 'handleErrors'));
 
         //Apply final outer middleware layers
@@ -1309,8 +1274,7 @@ class Slim
      *
      * This method finds and iterates all route objects that match the current request URI.
      */
-    public function call()
-    {
+    public function call() {
         try {
             if (isset($this->environment['slim.flash'])) {
                 $this->view()->setData('flash', $this->environment['slim.flash']);
@@ -1318,7 +1282,7 @@ class Slim
             $this->applyHook('slim.before');
             ob_start();
             $this->applyHook('slim.before.router');
-            $dispatched = false;
+            $dispatched    = false;
             $matchedRoutes = $this->router->getMatchedRoutes($this->request->getMethod(), $this->request->getResourceUri());
             foreach ($matchedRoutes as $route) {
                 try {
@@ -1353,8 +1317,8 @@ class Slim
     }
 
     /********************************************************************************
-    * Error Handling and Debugging
-    *******************************************************************************/
+     * Error Handling and Debugging
+     *******************************************************************************/
 
     /**
      * Convert errors into ErrorException objects
@@ -1363,15 +1327,14 @@ class Slim
      * these \ErrorException objects are then thrown and caught by Slim's
      * built-in or custom error handlers.
      *
-     * @param  int            $errno   The numeric type of the Error
-     * @param  string         $errstr  The error message
-     * @param  string         $errfile The absolute path to the affected file
-     * @param  int            $errline The line number of the error in the affected file
+     * @param  int    $errno   The numeric type of the Error
+     * @param  string $errstr  The error message
+     * @param  string $errfile The absolute path to the affected file
+     * @param  int    $errline The line number of the error in the affected file
      * @return bool
      * @throws \ErrorException
      */
-    public static function handleErrors($errno, $errstr = '', $errfile = '', $errline = '')
-    {
+    public static function handleErrors($errno, $errstr = '', $errfile = '', $errline = '') {
         if (!($errno & error_reporting())) {
             return;
         }
@@ -1384,28 +1347,25 @@ class Slim
      *
      * This method accepts a title and body content to generate an HTML document layout.
      *
-     * @param  string   $title  The title of the HTML template
-     * @param  string   $body   The body content of the HTML template
+     * @param  string $title The title of the HTML template
+     * @param  string $body  The body content of the HTML template
      * @return string
      */
-    protected static function generateTemplateMarkup($title, $body)
-    {
+    protected static function generateTemplateMarkup($title, $body) {
         return sprintf("<html><head><title>%s</title><style>body{margin:0;padding:30px;font:12px/1.5 Helvetica,Arial,Verdana,sans-serif;}h1{margin:0;font-size:48px;font-weight:normal;line-height:48px;}strong{display:inline-block;width:65px;}</style></head><body><h1>%s</h1>%s</body></html>", $title, $title, $body);
     }
 
     /**
      * Default Not Found handler
      */
-    protected function defaultNotFound()
-    {
+    protected function defaultNotFound() {
         echo static::generateTemplateMarkup('404 Page Not Found', '<p>The page you are looking for could not be found. Check the address bar to ensure your URL is spelled correctly. If all else fails, you can visit our home page at the link below.</p><a href="' . $this->request->getRootUri() . '/">Visit the Home Page</a>');
     }
 
     /**
      * Default Error handler
      */
-    protected function defaultError($e)
-    {
+    protected function defaultError($e) {
         $this->getLog()->error($e);
         echo self::generateTemplateMarkup('Error', '<p>A website error has occurred. The website administrator has been notified of the issue. Sorry for the temporary inconvenience.</p>');
     }

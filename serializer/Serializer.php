@@ -18,7 +18,7 @@ interface Serializer {
     /**
      * Retorna les dades seriades en el format adequat per la classe concreta.
      *
-     * @param mixed $data dades per seriar
+     * @param mixed|mixed[] $data dades per seriar
      * @return string dades seriades
      */
     public function getSerialized($data);

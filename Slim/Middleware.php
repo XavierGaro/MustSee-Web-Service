@@ -39,8 +39,7 @@ namespace Slim;
  * @author  Josh Lockhart
  * @since   1.6.0
  */
-abstract class Middleware
-{
+abstract class Middleware {
     /**
      * @var \Slim\Slim Reference to the primary application instance
      */
@@ -59,8 +58,7 @@ abstract class Middleware
      *
      * @param  \Slim\Slim $application
      */
-    final public function setApplication($application)
-    {
+    final public function setApplication($application) {
         $this->app = $application;
     }
 
@@ -72,8 +70,7 @@ abstract class Middleware
      *
      * @return \Slim\Slim
      */
-    final public function getApplication()
-    {
+    final public function getApplication() {
         return $this->app;
     }
 
@@ -86,8 +83,7 @@ abstract class Middleware
      *
      * @param \Slim|\Slim\Middleware
      */
-    final public function setNextMiddleware($nextMiddleware)
-    {
+    final public function setNextMiddleware($nextMiddleware) {
         $this->next = $nextMiddleware;
     }
 
@@ -99,8 +95,7 @@ abstract class Middleware
      *
      * @return \Slim\Slim|\Slim\Middleware
      */
-    final public function getNextMiddleware()
-    {
+    final public function getNextMiddleware() {
         return $this->next;
     }
 

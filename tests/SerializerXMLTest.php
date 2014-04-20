@@ -1,19 +1,25 @@
 <?php
+use Serializer\Serializer;
+
 require_once 'AutoLoader.php';
 
 /**
- * Class XMLSerializerTest
+ * Class SerializerXMLTest
+ * Tests per comprovar el funcionament correcte de la classe SerializerXML.
  *
  * @author Xavier García
  */
-class XMLSerializerTest extends PHPUnit_Framework_TestCase {
+class SerializerXMLTest extends PHPUnit_Framework_TestCase {
     const DEFAULT_NODE = 'test';
+
+    /**
+     * @var Serializer
+     */
     private $serializer;
 
     protected function setUp() {
         $this->serializer = \Serializer\SerializerFactory::getInstance('xml');
     }
-
 
     public function testGetXMLString() {
         $string   = 'prova';

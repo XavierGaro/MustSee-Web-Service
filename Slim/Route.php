@@ -34,12 +34,12 @@ namespace Slim;
 
 /**
  * Route
+ *
  * @package Slim
  * @author  Josh Lockhart, Thomas Bley
  * @since   1.0.0
  */
-class Route
-{
+class Route {
     /**
      * @var string The route pattern (e.g. "/books/:id")
      */
@@ -97,12 +97,12 @@ class Route
 
     /**
      * Constructor
-     * @param string $pattern The URL pattern (e.g. "/books/:id")
-     * @param mixed $callable Anything that returns TRUE for is_callable()
-     * @param bool $caseSensitive Whether or not this route should be matched in a case-sensitive manner
+     *
+     * @param string $pattern       The URL pattern (e.g. "/books/:id")
+     * @param mixed  $callable      Anything that returns TRUE for is_callable()
+     * @param bool   $caseSensitive Whether or not this route should be matched in a case-sensitive manner
      */
-    public function __construct($pattern, $callable, $caseSensitive = true)
-    {
+    public function __construct($pattern, $callable, $caseSensitive = true) {
         $this->setPattern($pattern);
         $this->setCallable($callable);
         $this->setConditions(self::getDefaultConditions());
@@ -111,65 +111,66 @@ class Route
 
     /**
      * Set default route conditions for all instances
+     *
      * @param  array $defaultConditions
      */
-    public static function setDefaultConditions(array $defaultConditions)
-    {
+    public static function setDefaultConditions(array $defaultConditions) {
         self::$defaultConditions = $defaultConditions;
     }
 
     /**
      * Get default route conditions for all instances
+     *
      * @return array
      */
-    public static function getDefaultConditions()
-    {
+    public static function getDefaultConditions() {
         return self::$defaultConditions;
     }
 
     /**
      * Get route pattern
+     *
      * @return string
      */
-    public function getPattern()
-    {
+    public function getPattern() {
         return $this->pattern;
     }
 
     /**
      * Set route pattern
+     *
      * @param  string $pattern
      */
-    public function setPattern($pattern)
-    {
+    public function setPattern($pattern) {
         $this->pattern = $pattern;
     }
 
     /**
      * Get route callable
+     *
      * @return mixed
      */
-    public function getCallable()
-    {
+    public function getCallable() {
         return $this->callable;
     }
 
     /**
      * Set route callable
+     *
      * @param  mixed $callable
      * @throws \InvalidArgumentException If argument is not callable
      */
-    public function setCallable($callable)
-    {
+    public function setCallable($callable) {
         $matches = array();
         if (is_string($callable) && preg_match('!^([^\:]+)\:([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!', $callable, $matches)) {
-            $class = $matches[1];
-            $method = $matches[2];
-            $callable = function() use ($class, $method) {
+            $class    = $matches[1];
+            $method   = $matches[2];
+            $callable = function () use ($class, $method) {
                 static $obj = null;
                 if ($obj === null) {
                     $obj = new $class;
                 }
+
                 return call_user_func_array(array($obj, $method), func_get_args());
             };
         }
@@ -183,66 +184,66 @@ class Route
 
     /**
      * Get route conditions
+     *
      * @return array
      */
-    public function getConditions()
-    {
+    public function getConditions() {
         return $this->conditions;
     }
 
     /**
      * Set route conditions
+     *
      * @param  array $conditions
      */
-    public function setConditions(array $conditions)
-    {
+    public function setConditions(array $conditions) {
         $this->conditions = $conditions;
     }
 
     /**
      * Get route name
+     *
      * @return string|null
      */
-    public function getName()
-    {
+    public function getName() {
         return $this->name;
     }
 
     /**
      * Set route name
+     *
      * @param  string $name
      */
-    public function setName($name)
-    {
+    public function setName($name) {
         $this->name = (string)$name;
     }
 
     /**
      * Get route parameters
+     *
      * @return array
      */
-    public function getParams()
-    {
+    public function getParams() {
         return $this->params;
     }
 
     /**
      * Set route parameters
+     *
      * @param  array $params
      */
-    public function setParams($params)
-    {
+    public function setParams($params) {
         $this->params = $params;
     }
 
     /**
      * Get route parameter value
+     *
      * @param  string $index Name of URL parameter
      * @return string
      * @throws \InvalidArgumentException If route parameter does not exist at index
      */
-    public function getParam($index)
-    {
+    public function getParam($index) {
         if (!isset($this->params[$index])) {
             throw new \InvalidArgumentException('Route parameter does not exist at specified index');
         }
@@ -252,12 +253,12 @@ class Route
 
     /**
      * Set route parameter value
+     *
      * @param  string $index Name of URL parameter
-     * @param  mixed $value The new parameter value
+     * @param  mixed  $value The new parameter value
      * @throws \InvalidArgumentException If route parameter does not exist at index
      */
-    public function setParam($index, $value)
-    {
+    public function setParam($index, $value) {
         if (!isset($this->params[$index])) {
             throw new \InvalidArgumentException('Route parameter does not exist at specified index');
         }
@@ -267,37 +268,35 @@ class Route
     /**
      * Add supported HTTP method(s)
      */
-    public function setHttpMethods()
-    {
-        $args = func_get_args();
+    public function setHttpMethods() {
+        $args          = func_get_args();
         $this->methods = $args;
     }
 
     /**
      * Get supported HTTP methods
+     *
      * @return array
      */
-    public function getHttpMethods()
-    {
+    public function getHttpMethods() {
         return $this->methods;
     }
 
     /**
      * Append supported HTTP methods
      */
-    public function appendHttpMethods()
-    {
-        $args = func_get_args();
+    public function appendHttpMethods() {
+        $args          = func_get_args();
         $this->methods = array_merge($this->methods, $args);
     }
 
     /**
      * Append supported HTTP methods (alias for Route::appendHttpMethods)
+     *
      * @return \Slim\Route
      */
-    public function via()
-    {
-        $args = func_get_args();
+    public function via() {
+        $args          = func_get_args();
         $this->methods = array_merge($this->methods, $args);
 
         return $this;
@@ -305,20 +304,20 @@ class Route
 
     /**
      * Detect support for an HTTP method
+     *
      * @param  string $method
      * @return bool
      */
-    public function supportsHttpMethod($method)
-    {
+    public function supportsHttpMethod($method) {
         return in_array($method, $this->methods);
     }
 
     /**
      * Get middleware
+     *
      * @return array[Callable]
      */
-    public function getMiddleware()
-    {
+    public function getMiddleware() {
         return $this->middleware;
     }
 
@@ -336,8 +335,7 @@ class Route
      * @return \Slim\Route
      * @throws \InvalidArgumentException If argument is not callable or not an array of callables.
      */
-    public function setMiddleware($middleware)
-    {
+    public function setMiddleware($middleware) {
         if (is_callable($middleware)) {
             $this->middleware[] = $middleware;
         } elseif (is_array($middleware)) {
@@ -365,13 +363,12 @@ class Route
      * @param  string $resourceUri A Request URI
      * @return bool
      */
-    public function matches($resourceUri)
-    {
+    public function matches($resourceUri) {
         //Convert URL params into regex patterns, construct a regex for this route, init params
         $patternAsRegex = preg_replace_callback(
-            '#:([\w]+)\+?#',
-            array($this, 'matchesCallback'),
-            str_replace(')', ')?', (string)$this->pattern)
+                '#:([\w]+)\+?#',
+                array($this, 'matchesCallback'),
+                str_replace(')', ')?', (string)$this->pattern)
         );
         if (substr($this->pattern, -1) === '/') {
             $patternAsRegex .= '?';
@@ -402,11 +399,11 @@ class Route
 
     /**
      * Convert a URL parameter (e.g. ":id", ":id+") into a regular expression
+     *
      * @param  array $m URL parameters
      * @return string       Regular expression for URL parameter
      */
-    protected function matchesCallback($m)
-    {
+    protected function matchesCallback($m) {
         $this->paramNames[] = $m[1];
         if (isset($this->conditions[$m[1]])) {
             return '(?P<' . $m[1] . '>' . $this->conditions[$m[1]] . ')';
@@ -422,11 +419,11 @@ class Route
 
     /**
      * Set route name
+     *
      * @param  string $name The name of the route
      * @return \Slim\Route
      */
-    public function name($name)
-    {
+    public function name($name) {
         $this->setName($name);
 
         return $this;
@@ -434,11 +431,11 @@ class Route
 
     /**
      * Merge route conditions
+     *
      * @param  array $conditions Key-value array of URL parameter conditions
      * @return \Slim\Route
      */
-    public function conditions(array $conditions)
-    {
+    public function conditions(array $conditions) {
         $this->conditions = array_merge($this->conditions, $conditions);
 
         return $this;
@@ -453,13 +450,13 @@ class Route
      *
      * @return bool
      */
-    public function dispatch()
-    {
+    public function dispatch() {
         foreach ($this->middleware as $mw) {
             call_user_func_array($mw, array($this));
         }
 
         $return = call_user_func_array($this->getCallable(), array_values($this->getParams()));
+
         return ($return === false) ? false : true;
     }
 }

@@ -32,20 +32,20 @@
  */
 namespace Slim\Helper;
 
-class Set implements \ArrayAccess, \Countable, \IteratorAggregate
-{
+class Set implements \ArrayAccess, \Countable, \IteratorAggregate {
     /**
      * Key-value array of arbitrary Data
+     *
      * @var array
      */
     protected $data = array();
 
     /**
      * Constructor
+     *
      * @param array $items Pre-populate set with this key-value array
      */
-    public function __construct($items = array())
-    {
+    public function __construct($items = array()) {
         $this->replace($items);
     }
 
@@ -59,29 +59,28 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate
      * @param  string $key The Data key
      * @return mixed       The transformed/normalized Data key
      */
-    protected function normalizeKey($key)
-    {
+    protected function normalizeKey($key) {
         return $key;
     }
 
     /**
      * Set Data key to value
+     *
      * @param string $key   The Data key
      * @param mixed  $value The Data value
      */
-    public function set($key, $value)
-    {
+    public function set($key, $value) {
         $this->data[$this->normalizeKey($key)] = $value;
     }
 
     /**
      * Get Data value with key
+     *
      * @param  string $key     The Data key
      * @param  mixed  $default The value to return if Data key does not exist
      * @return mixed           The Data value, or the default value
      */
-    public function get($key, $default = null)
-    {
+    public function get($key, $default = null) {
         if ($this->has($key)) {
             $isInvokable = is_object($this->data[$this->normalizeKey($key)]) && method_exists($this->data[$this->normalizeKey($key)], '__invoke');
 
@@ -93,10 +92,10 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate
 
     /**
      * Add Data to set
+     *
      * @param array $items Key-value array of Data to append to this set
      */
-    public function replace($items)
-    {
+    public function replace($items) {
         foreach ($items as $key => $value) {
             $this->set($key, $value); // Ensure keys are normalized
         }
@@ -104,38 +103,38 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate
 
     /**
      * Fetch set Data
+     *
      * @return array This set's key-value Data array
      */
-    public function all()
-    {
+    public function all() {
         return $this->data;
     }
 
     /**
      * Fetch set Data keys
+     *
      * @return array This set's key-value Data array keys
      */
-    public function keys()
-    {
+    public function keys() {
         return array_keys($this->data);
     }
 
     /**
      * Does this set contain a key?
-     * @param  string  $key The Data key
+     *
+     * @param  string $key The Data key
      * @return boolean
      */
-    public function has($key)
-    {
+    public function has($key) {
         return array_key_exists($this->normalizeKey($key), $this->data);
     }
 
     /**
      * Remove value with key from this set
+     *
      * @param  string $key The Data key
      */
-    public function remove($key)
-    {
+    public function remove($key) {
         unset($this->data[$this->normalizeKey($key)]);
     }
 
@@ -143,31 +142,26 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate
      * Property Overloading
      */
 
-    public function __get($key)
-    {
+    public function __get($key) {
         return $this->get($key);
     }
 
-    public function __set($key, $value)
-    {
+    public function __set($key, $value) {
         $this->set($key, $value);
     }
 
-    public function __isset($key)
-    {
+    public function __isset($key) {
         return $this->has($key);
     }
 
-    public function __unset($key)
-    {
+    public function __unset($key) {
         return $this->remove($key);
     }
 
     /**
      * Clear all values
      */
-    public function clear()
-    {
+    public function clear() {
         $this->data = array();
     }
 
@@ -175,23 +169,19 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate
      * Array Access
      */
 
-    public function offsetExists($offset)
-    {
+    public function offsetExists($offset) {
         return $this->has($offset);
     }
 
-    public function offsetGet($offset)
-    {
+    public function offsetGet($offset) {
         return $this->get($offset);
     }
 
-    public function offsetSet($offset, $value)
-    {
+    public function offsetSet($offset, $value) {
         $this->set($offset, $value);
     }
 
-    public function offsetUnset($offset)
-    {
+    public function offsetUnset($offset) {
         $this->remove($offset);
     }
 
@@ -199,8 +189,7 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate
      * Countable
      */
 
-    public function count()
-    {
+    public function count() {
         return count($this->data);
     }
 
@@ -208,19 +197,18 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate
      * IteratorAggregate
      */
 
-    public function getIterator()
-    {
+    public function getIterator() {
         return new \ArrayIterator($this->data);
     }
 
     /**
      * Ensure a value or object will remain globally unique
-     * @param  string  $key   The value or object name
-     * @param  Closure        The closure that defines the object
+     *
+     * @param  string $key           The value or object name
+     * @param         Closure        The closure that defines the object
      * @return mixed
      */
-    public function singleton($key, $value)
-    {
+    public function singleton($key, $value) {
         $this->set($key, function ($c) use ($value) {
             static $object;
 
@@ -234,11 +222,11 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate
 
     /**
      * Protect closure from being directly invoked
+     *
      * @param  Closure $callable A closure to keep from being invoked and evaluated
      * @return Closure
      */
-    public function protect(\Closure $callable)
-    {
+    public function protect(\Closure $callable) {
         return function () use ($callable) {
             return $callable;
         };

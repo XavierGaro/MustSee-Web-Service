@@ -44,6 +44,5 @@ namespace Slim\Exception;
  * @author  Josh Lockhart
  * @since   1.0.0
  */
-class Pass extends \Exception
-{
+class Pass extends \Exception {
 }

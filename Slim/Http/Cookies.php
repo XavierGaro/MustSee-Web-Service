@@ -32,19 +32,19 @@
  */
 namespace Slim\Http;
 
-class Cookies extends \Slim\Helper\Set
-{
+class Cookies extends \Slim\Helper\Set {
     /**
      * Default cookie settings
+     *
      * @var array
      */
     protected $defaults = array(
-        'value' => '',
-        'domain' => null,
-        'path' => null,
-        'expires' => null,
-        'secure' => false,
-        'httponly' => false
+            'value'    => '',
+            'domain'   => null,
+            'path'     => null,
+            'expires'  => null,
+            'secure'   => false,
+            'httponly' => false
     );
 
     /**
@@ -61,8 +61,7 @@ class Cookies extends \Slim\Helper\Set
      * @param string $key   Cookie name
      * @param mixed  $value Cookie settings
      */
-    public function set($key, $value)
-    {
+    public function set($key, $value) {
         if (is_array($value)) {
             $cookieSettings = array_replace($this->defaults, $value);
         } else {
@@ -82,9 +81,8 @@ class Cookies extends \Slim\Helper\Set
      * @param  string $key      Cookie name
      * @param  array  $settings Optional cookie settings
      */
-    public function remove($key, $settings = array())
-    {
-        $settings['value'] = '';
+    public function remove($key, $settings = array()) {
+        $settings['value']   = '';
         $settings['expires'] = time() - 86400;
         $this->set($key, array_replace($this->defaults, $settings));
     }

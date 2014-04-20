@@ -1,7 +1,9 @@
 <?php
 /**
- * Permet carregar les classes necessaries automàticament pels tests
+ * Script que permet carregar les classes necessaries automàticament pels tests de PHPUnit
+ *
+ * @author Xavier García
  */
 spl_autoload_register(function ($class) {
-    include '..\\' . $class . '.php';
+    require_once "..\\$class.php";
 });

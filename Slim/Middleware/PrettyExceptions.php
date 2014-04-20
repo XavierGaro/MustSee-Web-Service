@@ -42,8 +42,7 @@ namespace Slim\Middleware;
  * @author  Josh Lockhart
  * @since   1.0.0
  */
-class PrettyExceptions extends \Slim\Middleware
-{
+class PrettyExceptions extends \Slim\Middleware {
     /**
      * @var array
      */
@@ -51,23 +50,22 @@ class PrettyExceptions extends \Slim\Middleware
 
     /**
      * Constructor
+     *
      * @param array $settings
      */
-    public function __construct($settings = array())
-    {
+    public function __construct($settings = array()) {
         $this->settings = $settings;
     }
 
     /**
      * Call
      */
-    public function call()
-    {
+    public function call() {
         try {
             $this->next->call();
         } catch (\Exception $e) {
-            $log = $this->app->getLog(); // Force Slim to append log to env if not already
-            $env = $this->app->environment();
+            $log             = $this->app->getLog(); // Force Slim to append log to env if not already
+            $env             = $this->app->environment();
             $env['slim.log'] = $log;
             $env['slim.log']->error($e);
             $this->app->contentType('text/html');
@@ -78,19 +76,19 @@ class PrettyExceptions extends \Slim\Middleware
 
     /**
      * Render response body
+     *
      * @param  array      $env
      * @param  \Exception $exception
      * @return string
      */
-    protected function renderBody(&$env, $exception)
-    {
-        $title = 'Slim Application Error';
-        $code = $exception->getCode();
+    protected function renderBody(&$env, $exception) {
+        $title   = 'Slim Application Error';
+        $code    = $exception->getCode();
         $message = $exception->getMessage();
-        $file = $exception->getFile();
-        $line = $exception->getLine();
-        $trace = str_replace(array('#', '\n'), array('<div>#', '</div>'), $exception->getTraceAsString());
-        $html = sprintf('<h1>%s</h1>', $title);
+        $file    = $exception->getFile();
+        $line    = $exception->getLine();
+        $trace   = str_replace(array('#', '\n'), array('<div>#', '</div>'), $exception->getTraceAsString());
+        $html    = sprintf('<h1>%s</h1>', $title);
         $html .= '<p>The application could not run because of the following error:</p>';
         $html .= '<h2>Details</h2>';
         $html .= sprintf('<div><strong>Type:</strong> %s</div>', get_class($exception));
