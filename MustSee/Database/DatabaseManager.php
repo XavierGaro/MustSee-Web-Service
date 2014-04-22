@@ -318,7 +318,7 @@ class DatabaseManager {
         }
 
         // Obtenim la data d'avui
-        $today = date("m.d.y");
+        $today = date("y.m.d");
 
         // Obtenim la id del usuari
         $idUsuari = $this->getUsuariByCorreu($correu)->getId();

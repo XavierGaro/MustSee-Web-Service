@@ -297,8 +297,3 @@ després a renderError() per poder fer servir els arguments per defecte */
         $this->routes = array_merge($this->routes, $routes);
     }
 }
-
-
-
-
-
