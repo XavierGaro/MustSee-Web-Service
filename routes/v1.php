@@ -60,6 +60,19 @@ $postComment = function (DataBaseManager $dbm, RouteManager $routeManager) {
     };
 };
 
+$checkAuth = function (DataBaseManager $dbm, RouteManager $routeManager) {
+    return function ($auth) use ($dbm, $routeManager) {
+        try {
+            // Com que ja s'ha comprovat la autenticació al middleware, nomes cal
+            // mostrar el missatge
+            return ['message' => "S'ha autenticat correctament"];
+        } catch (Exception $ex) {
+            // No s'ha pogut comprovar la autenticació o ha hagut algun error
+            $routeManager->renderError("Error al fer la comprovació", 500);
+        }
+    };
+};
+
 // Afegim les rutes
 $routes[] = new Route(
         "GET",
@@ -109,7 +122,6 @@ $routes[] = new Route(
         'usuari'
 );
 
-
 $routes[] = new Route(
         "POST",
         "/$version/comentaris/llocs/:id",
@@ -118,3 +130,14 @@ $routes[] = new Route(
         'comentari',
         $authenticate($dbm, $routeManager)
 );
+
+
+$routes[] = new Route(
+        "POST",
+        "/$version/:auth",
+        $checkAuth($dbm, $routeManager),
+        array('auth' => 'auth'. RouteManager::EXTENSION),
+        'auth',
+        $authenticate($dbm, $routeManager)
+);
+
